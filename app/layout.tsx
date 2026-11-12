@@ -26,13 +26,19 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id">
-      <body className={`${geistSans.variable} ${geistMono.variable} bg-dark text-light`}>
-        <div className="d-flex min-vh-100">
+    <html lang="id" data-theme="light">
+      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+        <div className="app-container">
           <Sidebar />
-          <main className="flex-grow-1 p-4">
-            {children}
-          </main>
+          <main className="main-content">{children}</main>
+          <aside className="right-sidebar">
+            <div className="widget-card">
+              <div className="widget-title">Tentang Forumly</div>
+              <p className="widget-text">
+                Ruang diskusi mahasiswa untuk berbagi informasi perkuliahan, teknologi, dan komunitas.
+              </p>
+            </div>
+          </aside>
         </div>
       </body>
     </html>
