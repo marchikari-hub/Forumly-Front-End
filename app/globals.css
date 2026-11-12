@@ -233,3 +233,9 @@ body {
   color: var(--text-muted);
   line-height: 1.5;
 }
+
+.explore-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
