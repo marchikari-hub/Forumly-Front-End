@@ -32,6 +32,21 @@ export default function ExplorePage() {
     <div>
       <h2 className="feed-title">Eksplore Topik</h2>
 
+      {/* Tambahkan Search Bar dengan Tombol Cari di sini */}
+      <div className="top-header mb-4">
+        <form className="search-form" style={{ display: "flex", gap: "8px" }}>
+          <input
+            type="text"
+            placeholder="Cari topik atau kategori..."
+            className="search-input"
+            style={{ flex: 1 }}
+          />
+          <button type="submit" className="btn btn-primary">
+            Cari
+          </button>
+        </form>
+      </div>
+
       <div className="explore-grid">
         {CATEGORIES.map((item) => (
           <div key={item.slug} className="post-card">
