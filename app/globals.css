@@ -239,3 +239,35 @@ body {
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
 }
+
+.btn-action {
+  transition: all 0.2s ease-in-out;
+}
+
+.btn-action:hover {
+  background-color: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.explore-btn {
+  background: var(--input-bg);
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.2s ease-in-out;
+}
+
+.explore-btn:hover {
+  background-color: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+  text-decoration: underline;
+  transform: translateY(-2px);
+}
