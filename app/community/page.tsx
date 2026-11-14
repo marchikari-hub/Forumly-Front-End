@@ -81,23 +81,20 @@ export default function CommunityPage() {
         </button>
       </div>
 
-      <div style={{ marginBottom: "16px" }}>
-        <input
-          type="text"
-          placeholder="Filter nama komunitas..."
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "10px 14px",
-            borderRadius: "8px",
-            border: "1px solid var(--border-color)",
-            backgroundColor: "var(--input-bg)",
-            color: "var(--text-main)",
-            fontSize: "14px",
-            outline: "none",
-          }}
-        />
+      <div className="top-header mb-4">
+        <form onSubmit={(e) => e.preventDefault()} className="search-form" style={{ display: "flex", gap: "8px" }}>
+          <input
+            type="text"
+            placeholder="Cari nama komunitas..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="search-input"
+            style={{ flex: 1 }}
+          />
+          <button type="submit" className="btn btn-primary">
+            Cari
+          </button>
+        </form>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>

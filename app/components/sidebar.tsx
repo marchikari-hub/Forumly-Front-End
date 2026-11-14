@@ -9,9 +9,23 @@ export default function Sidebar() {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
-    const theme = isDarkMode ? "dark" : "light";
-    document.documentElement.setAttribute("data-theme", theme);
-  }, [isDarkMode]);
+    const savedTheme = localStorage.getItem("theme");
+    if (savedTheme === "dark") {
+      setIsDarkMode(true);
+      document.documentElement.setAttribute("data-theme", "dark");
+    } else {
+      setIsDarkMode(false);
+      document.documentElement.setAttribute("data-theme", "light");
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newMode = !isDarkMode;
+    setIsDarkMode(newMode);
+    const themeStr = newMode ? "dark" : "light";
+    document.documentElement.setAttribute("data-theme", themeStr);
+    localStorage.setItem("theme", themeStr);
+  };
 
   return (
     <aside className="sidebar">
@@ -39,7 +53,7 @@ export default function Sidebar() {
       <div className="sidebar-bottom">
         <button
           type="button"
-          onClick={() => setIsDarkMode(!isDarkMode)}
+          onClick={toggleTheme}
           className="btn-sidebar-theme"
         >
           {isDarkMode ? "Mode Terang" : "Mode Gelap"}

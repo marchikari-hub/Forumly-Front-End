@@ -6,14 +6,12 @@ interface CreateCommunityModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (name: string, desc: string) => void;
-  isLightMode: boolean;
 }
 
 export default function CreateCommunityModal({
   isOpen,
   onClose,
   onSubmit,
-  isLightMode,
 }: CreateCommunityModalProps) {
   const [name, setName] = useState("");
   const [desc, setDesc] = useState("");
@@ -28,11 +26,6 @@ export default function CreateCommunityModal({
     setDesc("");
   };
 
-  const modalBg = isLightMode ? "#ffffff" : "#141414";
-  const modalText = isLightMode ? "#111827" : "#ffffff";
-  const modalBorder = isLightMode ? "#e5e7eb" : "#27272a";
-  const inputBg = isLightMode ? "#f3f4f6" : "#27272a";
-
   return (
     <div
       style={{
@@ -42,7 +35,7 @@ export default function CreateCommunityModal({
         width: "100vw",
         height: "100vh",
         backgroundColor: "rgba(0, 0, 0, 0.6)",
-        backdropFilter: "blur(8px)",
+        backdropFilter: "blur(6px)",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
@@ -52,10 +45,10 @@ export default function CreateCommunityModal({
       <div
         style={{
           width: "460px",
-          backgroundColor: modalBg,
-          border: `1px solid ${modalBorder}`,
+          backgroundColor: "var(--bg-card)",
+          border: "1px solid var(--border-color)",
           borderRadius: "12px",
-          boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.5)",
+          boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.3)",
           overflow: "hidden",
         }}
       >
@@ -65,10 +58,10 @@ export default function CreateCommunityModal({
             justifyContent: "space-between",
             alignItems: "center",
             padding: "20px 24px 16px 24px",
-            borderBottom: `1px solid ${modalBorder}`,
+            borderBottom: "1px solid var(--border-color)",
           }}
         >
-          <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 600, color: modalText }}>
+          <h3 style={{ margin: 0, fontSize: "16px", fontWeight: 700, color: "var(--text-main)" }}>
             Buat Komunitas
           </h3>
           <button
@@ -77,7 +70,7 @@ export default function CreateCommunityModal({
             style={{
               background: "none",
               border: "none",
-              color: modalText,
+              color: "var(--text-muted)",
               cursor: "pointer",
               fontSize: "16px",
               padding: 0,
@@ -97,8 +90,8 @@ export default function CreateCommunityModal({
                 fontSize: "12px",
                 display: "block",
                 marginBottom: "6px",
-                fontWeight: 500,
-                color: modalText,
+                fontWeight: 700,
+                color: "var(--text-muted)",
               }}
             >
               Nama Komunitas
@@ -108,16 +101,7 @@ export default function CreateCommunityModal({
               placeholder="Contoh: Pemrograman Web"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              style={{
-                width: "100%",
-                padding: "10px 12px",
-                borderRadius: "6px",
-                border: `1px solid ${modalBorder}`,
-                backgroundColor: inputBg,
-                color: modalText,
-                outline: "none",
-                fontSize: "14px",
-              }}
+              className="search-input"
               required
             />
           </div>
@@ -128,8 +112,8 @@ export default function CreateCommunityModal({
                 fontSize: "12px",
                 display: "block",
                 marginBottom: "6px",
-                fontWeight: 500,
-                color: modalText,
+                fontWeight: 700,
+                color: "var(--text-muted)",
               }}
             >
               Deskripsi
@@ -139,34 +123,13 @@ export default function CreateCommunityModal({
               value={desc}
               onChange={(e) => setDesc(e.target.value)}
               rows={3}
-              style={{
-                width: "100%",
-                padding: "10px 12px",
-                borderRadius: "6px",
-                border: `1px solid ${modalBorder}`,
-                backgroundColor: inputBg,
-                color: modalText,
-                resize: "none",
-                outline: "none",
-                fontSize: "14px",
-              }}
+              className="search-input"
+              style={{ resize: "none", height: "auto" }}
             />
           </div>
 
           <div style={{ marginTop: "8px" }}>
-            <button
-              type="submit"
-              className="explore-btn"
-              style={{
-                backgroundColor: "#1d74f5",
-                color: "#ffffff",
-                width: "100%",
-                textAlign: "center",
-                padding: "11px",
-                borderColor: "#1d74f5",
-                fontWeight: 500,
-              }}
-            >
+            <button type="submit" className="btn btn-primary" style={{ width: "100%", padding: "11px" }}>
               Simpan
             </button>
           </div>
