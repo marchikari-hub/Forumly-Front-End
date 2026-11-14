@@ -30,7 +30,7 @@ const CATEGORIES = [
 export default function ExplorePage() {
   return (
     <div>
-      <h2 className="feed-title">Eksplorasi Topik</h2>
+      <h2 className="feed-title">Eksplore Topik</h2>
 
       <div className="explore-grid">
         {CATEGORIES.map((item) => (
@@ -39,7 +39,7 @@ export default function ExplorePage() {
             <p className="post-excerpt">{item.desc}</p>
             <div className="post-actions" style={{ justifyContent: "space-between", alignItems: "center" }}>
               <span className="post-header" style={{ margin: 0 }}>{item.count}</span>
-              <Link href={`/explore/${item.slug}`} className="btn-action">
+              <Link href={`/explore/${item.slug}`} className="explore-btn">
                 Buka Topik
               </Link>
             </div>
