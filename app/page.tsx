@@ -17,7 +17,6 @@ export default function Home() {
       <div>
         <h2 className="feed-title">Diskusi Terbaru</h2>
 
-        {/* Kartu Diskusi 1 */}
         <div className="post-card">
           <div className="post-header">
             <span className="post-author">Budi Setiawan</span> - 2 jam lalu dalam{" "}
@@ -36,7 +35,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Kartu Diskusi 2 */}
         <div className="post-card">
           <div className="post-header">
             <span className="post-author">Rian Pratama</span> - 4 jam lalu dalam{" "}
