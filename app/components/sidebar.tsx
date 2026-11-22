@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
+import { Settings } from "lucide-react";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -51,13 +52,23 @@ export default function Sidebar() {
       </div>
 
       <div className="sidebar-bottom">
-        <button
-          type="button"
-          onClick={toggleTheme}
-          className="btn-sidebar-theme"
-        >
-          {isDarkMode ? "Mode Terang" : "Mode Gelap"}
-        </button>
+        <div className="sidebar-actions">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className="btn-sidebar-theme"
+          >
+            {isDarkMode ? "Mode Terang" : "Mode Gelap"}
+          </button>
+          <Link
+            href="/settings"
+            className={`btn-sidebar-settings${pathname === "/settings" ? " active" : ""}`}
+            aria-label="Pengaturan"
+            title="Pengaturan"
+          >
+            <Settings size={18} aria-hidden="true" />
+          </Link>
+        </div>
       </div>
     </aside>
   );
