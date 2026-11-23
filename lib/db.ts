@@ -1,6 +1,7 @@
 import Database from "better-sqlite3";
 import path from "path";
 import fs from "fs";
+import { hashPassword } from "./password";
 
 export const ME = "Gracia";
 
@@ -13,6 +14,12 @@ function init(): Database.Database {
   const db = new Database(path.join(dir, "forumly.db"));
   db.pragma("journal_mode = WAL");
   db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT NOT NULL UNIQUE COLLATE NOCASE,
+      password_hash TEXT NOT NULL,
+      created_at INTEGER
+    );
     CREATE TABLE IF NOT EXISTS notifications (
       id INTEGER PRIMARY KEY, type TEXT NOT NULL, icon TEXT, actor TEXT,
       message TEXT, community TEXT, snippet TEXT, created_at INTEGER,
@@ -37,6 +44,13 @@ function init(): Database.Database {
     );
     CREATE TABLE IF NOT EXISTS joined (user TEXT, item_id INTEGER, PRIMARY KEY (user, item_id));
   `);
+
+  // Demo account so login can be tested before sign-up exists.
+  // Override the password with SEED_PASSWORD in .env.local.
+  if ((db.prepare("SELECT COUNT(*) c FROM users").get() as { c: number }).c === 0) {
+    db.prepare("INSERT INTO users (username,password_hash,created_at) VALUES (?,?,?)")
+      .run(ME, hashPassword(process.env.SEED_PASSWORD || "gracia123"), Date.now());
+  }
 
   if (db.prepare("SELECT COUNT(*) c FROM notifications").get() as { c: number } && (db.prepare("SELECT COUNT(*) c FROM notifications").get() as { c: number }).c === 0) {
     const now = Date.now();

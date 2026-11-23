@@ -24,7 +24,7 @@ async function hmacKey() {
 
 function toB64Url(buf: ArrayBuffer): string {
   let s = "";
-  for (const b of new Uint8Array(buf)) s += String.fromCharCode(b);
+  for (const b of Array.from(new Uint8Array(buf))) s += String.fromCharCode(b);
   return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
