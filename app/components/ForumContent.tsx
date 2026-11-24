@@ -10,7 +10,9 @@ import React, {
 import {
   Lang,
   ForumPost,
+  CommunityItem,
   INITIAL_POSTS,
+  INITIAL_COMMUNITIES,
   getLocalizedPost,
 } from "../data/forumData";
 
@@ -21,6 +23,7 @@ export type {
   PollOption,
   ForumPost,
   GenreTopic,
+  CommunityItem,
 } from "../data/forumData";
 export { GENRE_TOPICS } from "../data/forumData";
 
@@ -47,6 +50,13 @@ interface ForumContentValue {
     reason: string;
     detail?: string;
   }) => void;
+  communities: CommunityItem[];
+  toggleJoinCommunity: (communityId: string) => void;
+  createCommunity: (payload: {
+    name: string;
+    description: string;
+    category?: string;
+  }) => void;
 }
 
 const ForumContentStore = createContext<ForumContentValue | undefined>(
@@ -62,6 +72,8 @@ export function ForumContentProvider({
 }) {
   const [lang, setLangState] = useState<Lang>("id");
   const [posts, setPosts] = useState<ForumPost[]>(INITIAL_POSTS);
+  const [communities, setCommunities] =
+    useState<CommunityItem[]>(INITIAL_COMMUNITIES);
   const [reportNotice, setReportNotice] = useState<string | null>(null);
 
   useEffect(() => {
@@ -223,7 +235,7 @@ export function ForumContentProvider({
     );
   };
 
- const addReplyToComment = (
+  const addReplyToComment = (
     postId: string,
     commentId: string,
     text: string
@@ -282,6 +294,61 @@ export function ForumContentProvider({
     );
   };
 
+  const toggleJoinCommunity = (communityId: string) => {
+    setCommunities((prev) =>
+      prev.map((item) => {
+        if (item.id !== communityId) return item;
+        const nextJoined = !Boolean(item.joined);
+        return {
+          ...item,
+          joined: nextJoined,
+          members: nextJoined
+            ? item.members + 1
+            : Math.max(0, item.members - 1),
+        };
+      })
+    );
+  };
+
+  const createCommunity = ({
+    name,
+    description,
+    category,
+  }: {
+    name: string;
+    description: string;
+    category?: string;
+  }) => {
+    const cleanName = name.trim();
+    const cleanDesc = description.trim();
+    if (!cleanName || !cleanDesc) return;
+
+    const slugBase = cleanName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
+
+    const newItem: CommunityItem = {
+      id: `comm-${Date.now()}`,
+      slug: `${slugBase || "komunitas"}-${Date.now().toString().slice(-4)}`,
+      nameId: cleanName,
+      nameEn: cleanName,
+      descId: cleanDesc,
+      descEn: cleanDesc,
+      categoryId: category?.trim() || "Umum",
+      categoryEn: category?.trim() || "General",
+      members: 1,
+      joined: true,
+    };
+
+    setCommunities((prev) => [newItem, ...prev]);
+    setReportNotice(
+      lang === "id"
+        ? "Komunitas baru berhasil dibuat."
+        : "New community created."
+    );
+  };
+
   return (
     <ForumContentStore.Provider
       value={{
@@ -298,6 +365,9 @@ export function ForumContentProvider({
         toggleDislikeComment,
         addReplyToComment,
         submitCommentReport,
+        communities,
+        toggleJoinCommunity,
+        createCommunity,
       }}
     >
       {children}

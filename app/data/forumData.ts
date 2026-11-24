@@ -534,3 +534,172 @@ export function getLocalizedPost(post: ForumPost, lang: Lang) {
     })),
   };
 }
+
+export interface CommunityItem {
+  id: string;
+  slug: string;
+  nameId: string;
+  nameEn: string;
+  descId: string;
+  descEn: string;
+  categoryId: string;
+  categoryEn: string;
+  members: number;
+  joined?: boolean;
+}
+
+export interface CommunityItem {
+  id: string;
+  slug: string;
+  nameId: string;
+  nameEn: string;
+  descId: string;
+  descEn: string;
+  categoryId: string;
+  categoryEn: string;
+  members: number;
+  joined?: boolean;
+}
+
+export interface ForumRule {
+  id: string;
+  titleId: string;
+  titleEn: string;
+  descId: string;
+  descEn: string;
+}
+
+export const FORUM_RULES: ForumRule[] = [
+  {
+    id: "rule-1",
+    titleId: "1. Saling Menghargai & Etika Diskusi",
+    titleEn: "1. Respect & Constructive Etiquette",
+    descId:
+      "Gunakan bahasa yang sopan, hindari serangan personal, ujaran kebencian, atau perundungan saat berdiskusi maupun membalas komentar.",
+    descEn:
+      "Keep discussions polite and avoid personal attacks, hate speech, or harassment in posts and comment replies.",
+  },
+  {
+    id: "rule-2",
+    titleId: "2. Dilarang Spam, Promosi Berlebihan & Klikbait",
+    titleEn: "2. No Spam, Excessive Promo, or Clickbait",
+    descId:
+      "Jangan membanjiri topik dengan tautan promosi berulang, konten duplikat, atau judul menyesatkan yang tidak sesuai isi diskusi.",
+    descEn:
+      "Do not flood threads with repetitive promotional links, duplicate posts, or misleading clickbait titles.",
+  },
+  {
+    id: "rule-3",
+    titleId: "3. Pilih Topik / Kategori yang Sesuai",
+    titleEn: "3. Post in the Right Topic / Genre",
+    descId:
+      "Pastikan postingan sesuai dengan genre atau komunitas yang dituju agar diskusi mudah ditemukan dan tetap teratur.",
+    descEn:
+      "Match your post with the relevant genre or community so discussions stay organized and easy to find.",
+  },
+  {
+    id: "rule-4",
+    titleId: "4. Jaga Privasi & Hak Cipta",
+    titleEn: "4. Protect Privacy & Intellectual Property",
+    descId:
+      "Jangan membagikan data pribadi orang lain tanpa izin (doxxing) dan sertakan sumber jika mengutip materi atau karya orang lain.",
+    descEn:
+      "Never share others' personal information without consent (doxxing), and credit sources when referencing external work.",
+  },
+  {
+    id: "rule-5",
+    titleId: "5. Gunakan Fitur Laporan Secara Bertanggung Jawab",
+    titleEn: "5. Use Report Features Responsibly",
+    descId:
+      "Laporkan postingan atau komentar yang melanggar aturan forum agar moderator dapat meninjaunya dengan tepat.",
+    descEn:
+      "Report posts or comments that violate community guidelines so moderators can review them accurately.",
+  },
+];
+
+export const INITIAL_COMMUNITIES: CommunityItem[] = [
+  {
+    id: "comm-1",
+    slug: "dev-web-kampus",
+    nameId: "Pengembang Web & Aplikasi Kampus",
+    nameEn: "Campus Web & App Builders",
+    descId:
+      "Diskusi Next.js, Node.js, basis data, struktur data, tugas kuliah, dan review kode antar mahasiswa.",
+    descEn:
+      "Discussions on Next.js, Node.js, databases, data structures, coursework, and peer code reviews.",
+    categoryId: "Teknologi",
+    categoryEn: "Technology",
+    members: 248,
+    joined: true,
+  },
+  {
+    id: "comm-2",
+    slug: "anime-pop-kultur",
+    nameId: "Anime & Budaya Pop Jepang",
+    nameEn: "Anime & Japanese Pop Culture",
+    descId:
+      "Wadah diskusi anime musiman, rekomendasi tontonan, komik/manga, serta teori cerita.",
+    descEn:
+      "Space for seasonal anime discussions, watchlist recommendations, manga, and story theories.",
+    categoryId: "Anime",
+    categoryEn: "Anime",
+    members: 312,
+    joined: false,
+  },
+  {
+    id: "comm-3",
+    slug: "finansial-mahasiswa",
+    nameId: "Finansial & Investasi Mahasiswa",
+    nameEn: "Student Finance & Investing",
+    descId:
+      "Berbagi catatan anggaran bulanan, dana darurat, reksa dana/ETF indeks, dan perencanaan keuangan.",
+    descEn:
+      "Sharing monthly budgeting habits, emergency funds, index funds/ETFs, and financial planning.",
+    categoryId: "Keuangan",
+    categoryEn: "Finance",
+    members: 176,
+    joined: false,
+  },
+  {
+    id: "comm-4",
+    slug: "gaming-turnamen",
+    nameId: "Komunitas Gim & Turnamen Kampus",
+    nameEn: "Gaming & Campus Tournaments",
+    descId:
+      "Atur jadwal mabar, diskusi performa perangkat PC/mobile, serta persiapan turnamen antarkelas atau fakultas.",
+    descEn:
+      "Coordinate sessions, discuss PC/mobile performance tuning, and plan inter-class or faculty tournaments.",
+    categoryId: "Gaming",
+    categoryEn: "Gaming",
+    members: 289,
+    joined: true,
+  },
+  {
+    id: "comm-5",
+    slug: "desain-aset-kreatif",
+    nameId: "Desain UI/UX, Voxel & Konten Kreatif",
+    nameEn: "UI/UX, Voxel & Creative Studio",
+    descId:
+      "Berbagi portofolio antarmuka, aset 3D/voxel, palet warna, dan tips penyuntingan visual.",
+    descEn:
+      "Share interface portfolios, 3D/voxel assets, color palettes, and visual editing tips.",
+    categoryId: "Desain & Kreatif",
+    categoryEn: "Design & Creative",
+    members: 134,
+    joined: false,
+  },
+  {
+    id: "comm-6",
+    slug: "karier-magang-remote",
+    nameId: "Karier, Magang & Kerja Remote",
+    nameEn: "Career, Internships & Remote Work",
+    descId:
+      "Tukar pengalaman menyusun CV, portofolio proyek, persiapan wawancara teknis, dan info magang.",
+    descEn:
+      "Exchange tips on CVs, project portfolios, technical interview prep, and internship opportunities.",
+    categoryId: "Karier",
+    categoryEn: "Career",
+    members: 205,
+    joined: false,
+  },
+];
