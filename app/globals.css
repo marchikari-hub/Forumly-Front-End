@@ -44,7 +44,7 @@ body {
 .sidebar {
   background-color: var(--bg-card);
   border-right: 1px solid var(--border-color);
-  padding: 20px 16px;
+  padding: 20px 16px 14px 16px;
   height: 100vh;
   position: sticky;
   top: 0;
@@ -52,6 +52,11 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  overflow-y: auto;
+}
+
+.sidebar-top {
+  padding-bottom: 12px;
 }
 
 .main-content {
