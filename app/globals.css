@@ -188,11 +188,19 @@ body {
   font-weight: 600;
   border: none;
   cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .btn-primary {
   background-color: var(--accent);
   color: #ffffff;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.btn-primary:hover {
+  filter: brightness(0.92);
+  transform: translateY(-1px);
 }
 
 .feed-title {

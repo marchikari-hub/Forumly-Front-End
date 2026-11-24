@@ -48,6 +48,35 @@ export default function Sidebar() {
           <Link href="/community" className={`nav-item ${pathname === "/community" ? "active" : ""}`}>
             Komunitas
           </Link>
+
+          <span className="nav-title">HALAMAN UTAMA</span>
+          <Link href="/posts" className={`nav-item ${pathname === "/posts" ? "active" : ""}`}>
+            Post
+          </Link>
+          <Link href="/saved" className={`nav-item ${pathname === "/saved" ? "active" : ""}`}>
+            Tersimpan
+          </Link>
+          <Link href="/create-post" className={`nav-item ${pathname === "/create-post" ? "active" : ""}`}>
+            Buat Post
+          </Link>
+          <Link href="/chat" className={`nav-item ${pathname === "/chat" ? "active" : ""}`}>
+            Chat
+          </Link>
+          <Link href="/inbox" className={`nav-item ${pathname === "/inbox" ? "active" : ""}`}>
+            Inbox
+          </Link>
+          <Link href="/whats-new" className={`nav-item ${pathname === "/whats-new" ? "active" : ""}`}>
+            What's New
+          </Link>
+          <Link href="/about" className={`nav-item ${pathname === "/about" ? "active" : ""}`}>
+            About
+          </Link>
+          <Link href="/settings" className={`nav-item ${pathname === "/settings" ? "active" : ""}`}>
+            Settings
+          </Link>
+          <Link href="/contact-us" className={`nav-item ${pathname === "/contact-us" ? "active" : ""}`}>
+            Contact Us
+          </Link>
         </nav>
       </div>
 
