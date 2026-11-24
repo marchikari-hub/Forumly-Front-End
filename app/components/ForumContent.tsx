@@ -1,6 +1,12 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 import {
   Lang,
   ForumPost,
@@ -24,15 +30,39 @@ interface ForumContentValue {
   t: (idText: string, enText: string) => string;
   posts: ForumPost[];
   getPostText: (post: ForumPost) => ReturnType<typeof getLocalizedPost>;
+  toggleLikePost: (postId: string) => void;
+  toggleDislikePost: (postId: string) => void;
+  submitReport: (payload: {
+    postId: string;
+    reason: string;
+    detail?: string;
+  }) => void;
+  addComment: (postId: string, text: string) => void;
+  toggleLikeComment: (postId: string, commentId: string) => void;
+  toggleDislikeComment: (postId: string, commentId: string) => void;
+  addReplyToComment: (postId: string, commentId: string, text: string) => void;
+  submitCommentReport: (payload: {
+    postId: string;
+    commentId: string;
+    reason: string;
+    detail?: string;
+  }) => void;
 }
 
-const ForumContentStore = createContext<ForumContentValue | undefined>(undefined);
+const ForumContentStore = createContext<ForumContentValue | undefined>(
+  undefined
+);
 
 const STORAGE_KEY_LANG = "forumly_lang_v1";
 
-export function ForumContentProvider({ children }: { children: React.ReactNode }) {
+export function ForumContentProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [lang, setLangState] = useState<Lang>("id");
-  const [posts] = useState<ForumPost[]>(INITIAL_POSTS);
+  const [posts, setPosts] = useState<ForumPost[]>(INITIAL_POSTS);
+  const [reportNotice, setReportNotice] = useState<string | null>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY_LANG);
@@ -42,6 +72,12 @@ export function ForumContentProvider({ children }: { children: React.ReactNode }
       document.documentElement.setAttribute("data-lang", saved);
     }
   }, []);
+
+  useEffect(() => {
+    if (!reportNotice) return;
+    const timer = setTimeout(() => setReportNotice(null), 2600);
+    return () => clearTimeout(timer);
+  }, [reportNotice]);
 
   const setLang = (nextLang: Lang) => {
     setLangState(nextLang);
@@ -60,9 +96,230 @@ export function ForumContentProvider({ children }: { children: React.ReactNode }
     [lang]
   );
 
+  const toggleLikePost = (postId: string) => {
+    setPosts((prev) =>
+      prev.map((post) => {
+        if (post.id !== postId) return post;
+        const alreadyLiked = Boolean(post.likedByMe);
+        const alreadyDisliked = Boolean(post.dislikedByMe);
+        return {
+          ...post,
+          likedByMe: !alreadyLiked,
+          dislikedByMe: false,
+          likes: alreadyLiked ? Math.max(0, post.likes - 1) : post.likes + 1,
+          dislikes: alreadyDisliked
+            ? Math.max(0, post.dislikes - 1)
+            : post.dislikes,
+        };
+      })
+    );
+  };
+
+  const toggleDislikePost = (postId: string) => {
+    setPosts((prev) =>
+      prev.map((post) => {
+        if (post.id !== postId) return post;
+        const alreadyDisliked = Boolean(post.dislikedByMe);
+        const alreadyLiked = Boolean(post.likedByMe);
+        return {
+          ...post,
+          dislikedByMe: !alreadyDisliked,
+          likedByMe: false,
+          dislikes: alreadyDisliked
+            ? Math.max(0, post.dislikes - 1)
+            : post.dislikes + 1,
+          likes: alreadyLiked ? Math.max(0, post.likes - 1) : post.likes,
+        };
+      })
+    );
+  };
+
+  const submitReport = ({
+    postId,
+  }: {
+    postId: string;
+    reason: string;
+    detail?: string;
+  }) => {
+    setPosts((prev) =>
+      prev.map((post) =>
+        post.id === postId ? { ...post, reported: true } : post
+      )
+    );
+    setReportNotice(
+      lang === "id"
+        ? "Laporan berhasil dikirim untuk ditinjau."
+        : "Report submitted for review."
+    );
+  };
+
+  const addComment = (postId: string, text: string) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    setPosts((prev) =>
+      prev.map((post) => {
+        if (post.id !== postId) return post;
+        return {
+          ...post,
+          comments: [
+            ...post.comments,
+            {
+              id: `c-${Date.now()}`,
+              author: t("Anda", "You"),
+              text: trimmed,
+              likes: 0,
+              dislikes: 0,
+              replies: [],
+            },
+          ],
+        };
+      })
+    );
+  };
+
+  const toggleLikeComment = (postId: string, commentId: string) => {
+    setPosts((prev) =>
+      prev.map((post) => {
+        if (post.id !== postId) return post;
+        return {
+          ...post,
+          comments: post.comments.map((c) => {
+            if (c.id !== commentId) return c;
+            const liked = Boolean(c.likedByMe);
+            const disliked = Boolean(c.dislikedByMe);
+            return {
+              ...c,
+              likedByMe: !liked,
+              dislikedByMe: false,
+              likes: liked ? Math.max(0, c.likes - 1) : c.likes + 1,
+              dislikes: disliked ? Math.max(0, c.dislikes - 1) : c.dislikes,
+            };
+          }),
+        };
+      })
+    );
+  };
+
+  const toggleDislikeComment = (postId: string, commentId: string) => {
+    setPosts((prev) =>
+      prev.map((post) => {
+        if (post.id !== postId) return post;
+        return {
+          ...post,
+          comments: post.comments.map((c) => {
+            if (c.id !== commentId) return c;
+            const disliked = Boolean(c.dislikedByMe);
+            const liked = Boolean(c.likedByMe);
+            return {
+              ...c,
+              dislikedByMe: !disliked,
+              likedByMe: false,
+              dislikes: disliked ? Math.max(0, c.dislikes - 1) : c.dislikes + 1,
+              likes: liked ? Math.max(0, c.likes - 1) : c.likes,
+            };
+          }),
+        };
+      })
+    );
+  };
+
+ const addReplyToComment = (
+    postId: string,
+    commentId: string,
+    text: string
+  ) => {
+    const trimmed = text.trim();
+    if (!trimmed) return;
+    setPosts((prev) =>
+      prev.map((post) => {
+        if (post.id !== postId) return post;
+        return {
+          ...post,
+          comments: post.comments.map((c) => {
+            if (c.id !== commentId) return c;
+            return {
+              ...c,
+              replies: [
+                ...(c.replies ?? []),
+                {
+                  id: `r-${Date.now()}`,
+                  author: t("Anda", "You"),
+                  text: trimmed,
+                  likes: 0,
+                },
+              ],
+            };
+          }),
+        };
+      })
+    );
+  };
+
+  const submitCommentReport = ({
+    postId,
+    commentId,
+  }: {
+    postId: string;
+    commentId: string;
+    reason: string;
+    detail?: string;
+  }) => {
+    setPosts((prev) =>
+      prev.map((post) => {
+        if (post.id !== postId) return post;
+        return {
+          ...post,
+          comments: post.comments.map((c) =>
+            c.id === commentId ? { ...c, reported: true } : c
+          ),
+        };
+      })
+    );
+    setReportNotice(
+      lang === "id"
+        ? "Laporan komentar berhasil dikirim."
+        : "Comment report submitted."
+    );
+  };
+
   return (
-    <ForumContentStore.Provider value={{ lang, setLang, t, posts, getPostText }}>
+    <ForumContentStore.Provider
+      value={{
+        lang,
+        setLang,
+        t,
+        posts,
+        getPostText,
+        toggleLikePost,
+        toggleDislikePost,
+        submitReport,
+        addComment,
+        toggleLikeComment,
+        toggleDislikeComment,
+        addReplyToComment,
+        submitCommentReport,
+      }}
+    >
       {children}
+      {reportNotice && (
+        <div
+          style={{
+            position: "fixed",
+            bottom: "20px",
+            right: "20px",
+            backgroundColor: "var(--bg-card)",
+            color: "var(--text-main)",
+            border: "1px solid var(--accent)",
+            borderRadius: "10px",
+            padding: "10px 16px",
+            fontSize: "13px",
+            fontWeight: 600,
+            zIndex: 1100,
+          }}
+        >
+          {reportNotice}
+        </div>
+      )}
     </ForumContentStore.Provider>
   );
 }
