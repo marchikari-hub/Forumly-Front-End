@@ -136,6 +136,24 @@ export const GENRE_TOPICS: GenreTopic[] = [
     countId: "118 diskusi",
     countEn: "118 discussions",
   },
+  {
+    slug: "desain-kreatif",
+    nameId: "Desain & Kreatif",
+    nameEn: "Design & Creative",
+    descId: "UI/UX, desain grafis, aset 3D/voxel, dan penyuntingan konten visual.",
+    descEn: "UI/UX, graphic design, 3D/voxel assets, and visual content editing.",
+    countId: "64 diskusi",
+    countEn: "64 discussions",
+  },
+  {
+    slug: "sains-riset",
+    nameId: "Sains & Riset",
+    nameEn: "Science & Research",
+    descId: "Metodologi penelitian, eksperimen data, jurnal ilmiah, dan diskusi riset.",
+    descEn: "Research methodology, data experiments, academic papers, and research talks.",
+    countId: "58 diskusi",
+    countEn: "58 discussions",
+  },
 ];
 
 export const INITIAL_POSTS: ForumPost[] = [
@@ -195,14 +213,14 @@ export const INITIAL_POSTS: ForumPost[] = [
       {
         id: "c-102",
         author: "Brandon",
-        text: "Permainan petualangan dunia terbuka ini seru banget buat dijelajahi!",
+        text: "Menurutku yang alur misterinya rapi dan ritmenya santai paling enak buat ditonton pas akhir pekan.",
         likes: 5,
         dislikes: 0,
         replies: [
           {
             id: "r-202",
             author: "Rian",
-            text: "Setuju, grafisnya juga keren untuk dimainkan di ponsel maupun komputer.",
+            text: "Setuju, pacing yang pas bikin nggak gampang bosan.",
             likes: 2,
           },
         ],
@@ -248,6 +266,42 @@ export const INITIAL_POSTS: ForumPost[] = [
     videoUrl:
       "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
     likes: 17,
+    dislikes: 0,
+    comments: [],
+  },
+  {
+    id: "post-17",
+    author: "Ransley Pratama",
+    timeId: "3 jam lalu",
+    timeEn: "3 hours ago",
+    genreSlug: "desain-kreatif",
+    genreId: "Desain & Kreatif",
+    genreEn: "Design & Creative",
+    titleId: "Workflow aset 3D / voxel untuk game indie biar ukuran file tetap ringan",
+    titleEn: "3D / voxel asset workflow for indie games to keep file sizes lightweight",
+    excerptId:
+      "Bagaimana mengatur jumlah poligon, palet warna, dan ekspor tekstur agar tetap tajam tapi ramah performa?",
+    excerptEn:
+      "How do you balance polygon count, color palettes, and texture exports so visuals stay crisp yet performance-friendly?",
+    likes: 27,
+    dislikes: 0,
+    comments: [],
+  },
+  {
+    id: "post-18",
+    author: "Darius Haris",
+    timeId: "5 jam lalu",
+    timeEn: "5 hours ago",
+    genreSlug: "sains-riset",
+    genreId: "Sains & Riset",
+    genreEn: "Science & Research",
+    titleId: "Tips menyusun evaluasi model dan pembagian data time-series untuk tugas akhir",
+    titleEn: "Tips for structuring model evaluation and time-series splits for thesis research",
+    excerptId:
+      "Metrik apa saja yang paling informatif selain akurasi dasar saat menguji prediksi data berurutan?",
+    excerptEn:
+      "Which metrics are most informative beyond basic accuracy when evaluating sequential time-series predictions?",
+    likes: 32,
     dislikes: 0,
     comments: [],
   },

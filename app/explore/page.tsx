@@ -1,66 +1,95 @@
-import Link from "next/link";
+"use client";
 
-const CATEGORIES = [
-  {
-    slug: "anime",
-    name: "Anime & Manga",
-    desc: "Diskusi rekomendasi anime, ulasan chapter terbaru, dan teori cerita.",
-    count: "142 diskusi",
-  },
-  {
-    slug: "finance",
-    name: "Finance & Keuangan",
-    desc: "Perencanaan keuangan mahasiswa, investasi pemula, dan ekonomi.",
-    count: "89 diskusi",
-  },
-  {
-    slug: "sport",
-    name: "Olahraga",
-    desc: "Sepakbola, badminton, eSports, dan analisis pertandingan.",
-    count: "67 diskusi",
-  },
-  {
-    slug: "teknologi",
-    name: "Teknologi & Coding",
-    desc: "Pemrograman, struktur data, pengembangan web, dan tugas kuliah.",
-    count: "210 diskusi",
-  },
-];
+import React, { useState } from "react";
+import Link from "next/link";
+import { useForumContent, GENRE_TOPICS } from "../components/ForumContent";
 
 export default function ExplorePage() {
+  const { t, posts } = useForumContent();
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const normalizedQuery = searchQuery.trim().toLowerCase();
+
+  const filteredTopics = normalizedQuery
+    ? GENRE_TOPICS.filter((topic) => {
+        const name = t(topic.nameId, topic.nameEn).toLowerCase();
+        const desc = t(topic.descId, topic.descEn).toLowerCase();
+        return (
+          name.includes(normalizedQuery) ||
+          desc.includes(normalizedQuery) ||
+          topic.slug.toLowerCase().includes(normalizedQuery)
+        );
+      })
+    : GENRE_TOPICS;
+
   return (
     <div>
-      <h2 className="feed-title">Eksplore Topik</h2>
+      <h2 className="feed-title">
+        {t("Eksplore Topik", "Explore Topics")}
+      </h2>
 
-      {/* Tambahkan Search Bar dengan Tombol Cari di sini */}
       <div className="top-header mb-4">
-        <form className="search-form" style={{ display: "flex", gap: "8px" }}>
+        <form
+          onSubmit={(e) => e.preventDefault()}
+          className="search-form"
+          style={{ display: "flex", gap: "8px" }}
+        >
           <input
             type="text"
-            placeholder="Cari topik atau kategori..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder={t(
+              "Cari topik atau kategori...",
+              "Search topics or categories..."
+            )}
             className="search-input"
             style={{ flex: 1 }}
           />
           <button type="submit" className="btn btn-primary">
-            Cari
+            {t("Cari", "Search")}
           </button>
         </form>
       </div>
 
-      <div className="explore-grid">
-        {CATEGORIES.map((item) => (
-          <div key={item.slug} className="post-card">
-            <h3 className="post-title">{item.name}</h3>
-            <p className="post-excerpt">{item.desc}</p>
-            <div className="post-actions" style={{ justifyContent: "space-between", alignItems: "center" }}>
-              <span className="post-header" style={{ margin: 0 }}>{item.count}</span>
-              <Link href={`/explore/${item.slug}`} className="explore-btn">
-                Buka Topik
-              </Link>
-            </div>
-          </div>
-        ))}
-      </div>
+      {filteredTopics.length > 0 ? (
+        <div className="explore-grid">
+          {filteredTopics.map((item) => {
+            const topicPostsCount = posts.filter(
+              (p) => p.genreSlug.toLowerCase() === item.slug.toLowerCase()
+            ).length;
+
+            return (
+              <div key={item.slug} className="post-card">
+                <h3 className="post-title">{t(item.nameId, item.nameEn)}</h3>
+                <p className="post-excerpt">{t(item.descId, item.descEn)}</p>
+                <div
+                  className="post-actions"
+                  style={{
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                  }}
+                >
+                  <span className="post-header" style={{ margin: 0 }}>
+                    {topicPostsCount} {t("thread aktif", "active threads")}
+                  </span>
+                  <Link href={`/explore/${item.slug}`} className="explore-btn">
+                    {t("Buka Topik", "Open Topic")}
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="post-card">
+          <p style={{ margin: 0, color: "var(--text-muted)" }}>
+            {t(
+              "Topik yang kamu cari tidak ditemukan.",
+              "No matching topics found."
+            )}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
