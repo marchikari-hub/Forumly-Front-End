@@ -534,3 +534,55 @@ export function getLocalizedPost(post: ForumPost, lang: Lang) {
     })),
   };
 }
+
+export interface CommunityItem {
+  id: string;
+  slug: string;
+  nameId: string;
+  nameEn: string;
+  descId: string;
+  descEn: string;
+  categoryId: string;
+  categoryEn: string;
+  members: number;
+  joined?: boolean;
+}
+
+export const INITIAL_COMMUNITIES: CommunityItem[] = [
+  {
+    id: "comm-1",
+    slug: "dev-kampus",
+    nameId: "Komunitas Pengembang & Web",
+    nameEn: "Developers & Web Builders",
+    descId: "Diskusi proyek Next.js, struktur data, tugas kuliah, dan kolaborasi kode.",
+    descEn: "Discussions on Next.js projects, data structures, coursework, and code collaboration.",
+    categoryId: "Teknologi",
+    categoryEn: "Technology",
+    members: 184,
+    joined: true,
+  },
+  {
+    id: "comm-2",
+    slug: "finansial-muda",
+    nameId: "Finansial & Investasi Mahasiswa",
+    nameEn: "Student Finance & Investing",
+    descId: "Berbagi tips anggaran bulanan, dana darurat, dan strategi investasi jangka panjang.",
+    descEn: "Sharing monthly budgeting tips, emergency funds, and long-term investing strategies.",
+    categoryId: "Keuangan",
+    categoryEn: "Finance",
+    members: 129,
+    joined: false,
+  },
+  {
+    id: "comm-3",
+    slug: "anime-kreatif",
+    nameId: "Klub Anime, Gim & Kreatif",
+    nameEn: "Anime, Gaming & Creative Club",
+    descId: "Nobar/diskusi anime, turnamen santai, serta pameran aset desain dan 3D.",
+    descEn: "Anime discussions, casual tournaments, and design/3D asset showcases.",
+    categoryId: "Komunitas",
+    categoryEn: "Community",
+    members: 215,
+    joined: false,
+  },
+];
