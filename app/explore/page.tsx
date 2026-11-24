@@ -2,7 +2,8 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { useForumContent, GENRE_TOPICS } from "../components/ForumContent";
+import { useForumContent } from "../components/ForumContent";
+import { GENRE_TOPICS } from "../data/forumData";
 
 export default function ExplorePage() {
   const { t, posts } = useForumContent();

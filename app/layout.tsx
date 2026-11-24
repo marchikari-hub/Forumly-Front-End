@@ -4,6 +4,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./globals.css";
 import Sidebar from "./components/sidebar";
 import { ForumContentProvider } from "./components/ForumContent";
+import { RightSidebarInfo } from "./components/RightSidebarInfo";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -34,12 +35,7 @@ export default function RootLayout({
             <Sidebar />
             <main className="main-content">{children}</main>
             <aside className="right-sidebar">
-              <div className="widget-card">
-                <div className="widget-title">Tentang Forumly</div>
-                <p className="widget-text">
-                  Ruang diskusi mahasiswa untuk berbagi informasi perkuliahan, teknologi, dan komunitas.
-                </p>
-              </div>
+              <RightSidebarInfo />
             </aside>
           </div>
         </ForumContentProvider>
