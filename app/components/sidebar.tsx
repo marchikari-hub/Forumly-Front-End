@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Settings } from "lucide-react";
 import { useForumContent } from "./ForumContent";
+import FotoProfilMini from "./FotoProfilMini";
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -33,10 +34,14 @@ export default function Sidebar() {
   return (
     <aside className="sidebar">
       <div className="sidebar-top">
-        <div className="brand">
+        <div
+          className="brand"
+          style={{ display: "flex", alignItems: "center", gap: 12 }}
+        >
           <Link href="/" className="logo">
             Forumly
           </Link>
+          <FotoProfilMini />
         </div>
 
         <nav className="nav-group">

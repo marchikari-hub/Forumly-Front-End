@@ -6,7 +6,7 @@ import Hero from "./heading/hero";
 import Footer from "./footer/footer";
 import CameraProfile from "../components/CameraProfile";
 import styles from "./profile.module.css";
-
+import { useFotoProfil } from "../../lib/fotoprofile";
 type Post = {
   id: number;
   judul: string;
