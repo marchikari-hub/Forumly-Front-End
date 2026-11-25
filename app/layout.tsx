@@ -20,6 +20,9 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "Forumly - Platform Diskusi",
   description: "Platform Diskusi Mahasiswa",
+  other: {
+    google: "notranslate",
+  },
 };
 
 export default function RootLayout({
@@ -28,7 +31,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" data-theme="light">
+    <html lang="id" translate="no" data-theme="light">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
         <ForumContentProvider>
           <div className="app-container">
