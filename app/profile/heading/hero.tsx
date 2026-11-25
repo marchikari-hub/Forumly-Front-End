@@ -9,11 +9,18 @@ type HeroProps = {
   foto: string;
   jumlahPost: number;
   onGantiFoto: (file: File) => void;
+  onAmbilFoto: () => void;
 };
 
-export default function Hero({ nama, email, foto, jumlahPost, onGantiFoto }: HeroProps) {
+export default function Hero({
+  nama,
+  email,
+  foto,
+  jumlahPost,
+  onGantiFoto,
+  onAmbilFoto,
+}: HeroProps) {
   const inputGaleri = useRef<HTMLInputElement>(null);
-  const inputKamera = useRef<HTMLInputElement>(null);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -41,19 +48,11 @@ export default function Hero({ nama, email, foto, jumlahPost, onGantiFoto }: Her
           <button className={styles.tombolBiru} onClick={() => inputGaleri.current?.click()}>
             Pilih Foto
           </button>
-          <button className={styles.tombolBiru} onClick={() => inputKamera.current?.click()}>
+          <button className={styles.tombolBiru} onClick={onAmbilFoto}>
             Ambil Foto
           </button>
         </div>
         <input ref={inputGaleri} type="file" accept="image/*" onChange={handleChange} hidden />
-        <input
-          ref={inputKamera}
-          type="file"
-          accept="image/*"
-          capture="user"
-          onChange={handleChange}
-          hidden
-        />
       </div>
     </section>
   );

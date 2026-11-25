@@ -4,6 +4,7 @@ import { useState } from "react";
 import Nav from "./heading/nav";
 import Hero from "./heading/hero";
 import Footer from "./footer/footer";
+import CameraProfile from "../components/CameraProfile";
 import styles from "./profile.module.css";
 
 type Post = {
@@ -26,6 +27,7 @@ const postAwal: Post[] = [
 
 export default function ProfilePage() {
   const [foto, setFoto] = useState("");
+  const [showCamera, setShowCamera] = useState(false);
   const [daftarPost, setDaftarPost] = useState<Post[]>(postAwal);
 
   const nama = "graciacs.14052008";
@@ -33,6 +35,11 @@ export default function ProfilePage() {
 
   const gantiFoto = (file: File) => {
     setFoto(URL.createObjectURL(file));
+  };
+
+  // hasil jepretan kamera (base64) langsung dipakai sebagai foto profil
+  const ambilFoto = (dataUrl: string) => {
+    setFoto(dataUrl);
   };
 
   const tambahAngka = (id: number, kolom: Kolom) => {
@@ -61,6 +68,7 @@ export default function ProfilePage() {
           foto={foto}
           jumlahPost={daftarPost.length}
           onGantiFoto={gantiFoto}
+          onAmbilFoto={() => setShowCamera(true)}
         />
 
         <div className={styles.judulBagian}>
@@ -93,6 +101,13 @@ export default function ProfilePage() {
         ))}
       </main>
       <Footer />
+
+      {showCamera && (
+        <CameraProfile
+          onCapture={ambilFoto}
+          onClose={() => setShowCamera(false)}
+        />
+      )}
     </div>
   );
 }
