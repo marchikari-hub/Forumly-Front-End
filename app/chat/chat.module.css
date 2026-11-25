@@ -1,39 +1,105 @@
+/* ===== Mode terang (default) ===== */
 .halaman {
+  --bg: #f3f4f6;
+  --panel: #ffffff;
+  --panel-2: #f9fafb;
+  --border: #e5e7eb;
+  --input-border: #d1d5db;
+  --text: #111827;
+  --muted: #6b7280;
+  --accent: #00a8ff;
+  --accent-hover: #0090dd;
+  --hover: #f3f4f6;
+  --active: #e0f4ff;
+  --bubble-me-bg: #00a8ff;
+  --bubble-me-text: #ffffff;
+  --bubble-other-bg: #ffffff;
+  --judul-color: #00a8ff;
+  --judul-bg: none;
+  --avatar-bg: #00a8ff;
+  --avatar-text: #ffffff;
+  --glow: none;
+  --blur: none;
+
   padding: 24px;
-  background: #f3f4f6;
+  background: var(--bg);
+  color: var(--text);
   min-height: 100vh;
 }
 
+/* ===== Mode gelap: hologram ===== */
+:global([data-theme="dark"]) .halaman {
+  --bg: radial-gradient(circle at 15% 20%, rgba(0, 240, 255, 0.22), transparent 45%),
+    radial-gradient(circle at 85% 80%, rgba(255, 79, 216, 0.22), transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(138, 92, 255, 0.18), transparent 60%),
+    #05010f;
+  --panel: rgba(20, 12, 55, 0.55);
+  --panel-2: rgba(8, 4, 30, 0.45);
+  --border: rgba(0, 240, 255, 0.35);
+  --input-border: rgba(138, 92, 255, 0.6);
+  --text: #e8f7ff;
+  --muted: #9ab8d9;
+  --accent: #00f0ff;
+  --accent-hover: #7df9ff;
+  --hover: rgba(0, 240, 255, 0.1);
+  --active: rgba(138, 92, 255, 0.28);
+  --bubble-me-bg: linear-gradient(135deg, #00f0ff, #8a5cff, #ff4fd8);
+  --bubble-me-text: #06031a;
+  --bubble-other-bg: rgba(0, 240, 255, 0.08);
+  --judul-color: transparent;
+  --judul-bg: linear-gradient(90deg, #00f0ff, #8a5cff, #ff4fd8);
+  --avatar-bg: linear-gradient(135deg, #00f0ff, #8a5cff, #ff4fd8);
+  --avatar-text: #06031a;
+  --glow: 0 0 22px rgba(0, 240, 255, 0.35), inset 0 0 28px rgba(138, 92, 255, 0.18);
+  --blur: blur(14px);
+}
+
+/* ===== Layout ===== */
 .wadah {
+  position: relative;
   display: grid;
   grid-template-columns: 320px 1fr;
   height: calc(100vh - 48px);
-  background: #fff;
+  background: var(--panel);
   border-radius: 16px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid var(--border);
+  box-shadow: var(--glow);
+  backdrop-filter: var(--blur);
   overflow: hidden;
 }
 
 /* kolom kiri */
 .daftarKontak {
-  border-right: 1px solid #e5e7eb;
+  border-right: 1px solid var(--border);
   padding: 16px;
   overflow-y: auto;
 }
 
 .judul {
   margin: 0 0 12px;
-  color: #00a8ff;
+  color: var(--judul-color);
+  background: var(--judul-bg);
+  -webkit-background-clip: text;
+  background-clip: text;
+  background-size: 200% 100%;
 }
 
 .cari {
   width: 100%;
   padding: 10px 14px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--input-border);
   border-radius: 999px;
   margin-bottom: 12px;
   outline: none;
   box-sizing: border-box;
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+.cari:focus,
+.inputPesan:focus {
+  border-color: var(--accent);
+  box-shadow: var(--glow);
 }
 
 .kontak {
@@ -44,17 +110,18 @@
   padding: 10px;
   border: none;
   background: transparent;
+  color: var(--text);
   border-radius: 12px;
   cursor: pointer;
   text-align: left;
 }
 
 .kontak:hover {
-  background: #f3f4f6;
+  background: var(--hover);
 }
 
 .aktif {
-  background: #e0f4ff;
+  background: var(--active);
 }
 
 .infoKontak {
@@ -64,7 +131,7 @@
 }
 
 .infoKontak span {
-  color: #6b7280;
+  color: var(--muted);
   font-size: 13px;
   white-space: nowrap;
   overflow: hidden;
@@ -76,8 +143,9 @@
   width: 42px;
   height: 42px;
   border-radius: 50%;
-  background: #00a8ff;
-  color: #fff;
+  background: var(--avatar-bg);
+  background-size: 200% 200%;
+  color: var(--avatar-text);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -96,7 +164,7 @@
   align-items: center;
   gap: 12px;
   padding: 14px 20px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border);
 }
 
 .isiPesan {
@@ -106,7 +174,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  background: #f9fafb;
+  background: var(--panel-2);
 }
 
 .bubble {
@@ -122,15 +190,17 @@
 
 .saya {
   align-self: flex-end;
-  background: #00a8ff;
-  color: #fff;
+  background: var(--bubble-me-bg);
+  background-size: 200% 200%;
+  color: var(--bubble-me-text);
   border-bottom-right-radius: 4px;
+  box-shadow: var(--glow);
 }
 
 .lawan {
   align-self: flex-start;
-  background: #fff;
-  border: 1px solid #e5e7eb;
+  background: var(--bubble-other-bg);
+  border: 1px solid var(--border);
   border-bottom-left-radius: 4px;
 }
 
@@ -143,7 +213,7 @@
 }
 
 .kosong {
-  color: #9ca3af;
+  color: var(--muted);
   text-align: center;
   margin-top: 20px;
 }
@@ -152,27 +222,60 @@
   display: flex;
   gap: 10px;
   padding: 14px 20px;
-  border-top: 1px solid #e5e7eb;
+  border-top: 1px solid var(--border);
 }
 
 .inputPesan {
   flex: 1;
   padding: 12px 16px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--input-border);
   border-radius: 999px;
   outline: none;
+  background: var(--panel-2);
+  color: var(--text);
 }
 
 .tombolKirim {
-  background: #00a8ff;
-  color: #fff;
+  background: var(--bubble-me-bg);
+  background-size: 200% 200%;
+  color: var(--bubble-me-text);
   border: none;
   border-radius: 999px;
   padding: 0 28px;
   font-size: 16px;
+  font-weight: 600;
   cursor: pointer;
 }
 
 .tombolKirim:hover {
-  background: #0090dd;
+  filter: brightness(1.15);
+}
+
+/* ===== Efek hologram (hanya mode gelap) ===== */
+@keyframes holoGeser {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+:global([data-theme="dark"]) .judul,
+:global([data-theme="dark"]) .saya,
+:global([data-theme="dark"]) .avatar,
+:global([data-theme="dark"]) .tombolKirim {
+  animation: holoGeser 6s ease infinite;
+}
+
+/* garis scan tipis seperti proyeksi hologram */
+:global([data-theme="dark"]) .wadah::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 240, 255, 0.04) 0,
+    rgba(0, 240, 255, 0.04) 1px,
+    transparent 1px,
+    transparent 4px
+  );
 }
