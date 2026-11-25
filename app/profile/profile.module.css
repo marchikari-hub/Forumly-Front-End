@@ -193,3 +193,83 @@
   padding: 20px;
   color: #777;
 }
+
+:global([data-theme="dark"]) .halaman {
+  background: #0b0f1a;
+}
+
+:global([data-theme="dark"]) .wadah {
+  background: transparent;
+}
+
+:global([data-theme="dark"]) .judulBagian h2 {
+  color: #e8ecf5;
+}
+
+:global([data-theme="dark"]) .kartuProfil,
+:global([data-theme="dark"]) .kartuPost {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 198, 255, 0.18),
+    rgba(168, 85, 247, 0.18),
+    rgba(255, 105, 180, 0.18),
+    rgba(0, 255, 200, 0.18)
+  );
+  background-size: 300% 300%;
+  animation: holo 8s ease infinite;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 0 18px rgba(120, 200, 255, 0.15);
+  backdrop-filter: blur(6px);
+}
+
+:global([data-theme="dark"]) .nama {
+  color: #ffffff;
+}
+
+:global([data-theme="dark"]) .email,
+:global([data-theme="dark"]) .statistik {
+  color: #c9d1e6;
+}
+
+:global([data-theme="dark"]) .fotoKosong {
+  background: rgba(255, 255, 255, 0.12);
+  color: #8fd8ff;
+}
+
+:global([data-theme="dark"]) .judulPost {
+  color: #ffffff;
+}
+
+:global([data-theme="dark"]) .isiPost {
+  color: #c9d1e6;
+}
+
+:global([data-theme="dark"]) .garis {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+:global([data-theme="dark"]) .tombolAksi {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+:global([data-theme="dark"]) .tombolAksi:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+:global([data-theme="dark"]) .footer {
+  color: #9aa4bf;
+}
+
+@keyframes holo {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
