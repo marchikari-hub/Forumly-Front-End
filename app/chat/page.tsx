@@ -2,17 +2,43 @@
 
 import { FormEvent, useEffect, useRef, useState } from "react";
 import styles from "./chat.module.css";
+import { useForumContent } from "../components/ForumContent";
+
+type Bahasa = "id" | "en";
+
+type Teks = { id: string; en: string };
 
 type Pesan = {
   id: number;
   pengirim: "saya" | "lawan";
-  isi: string;
+  isi: Teks;
   waktu: string;
 };
 
 type Kontak = {
   id: number;
   nama: string;
+};
+
+const teks = {
+  id: {
+    judul: "Chat",
+    cari: "Cari percakapan...",
+    belumAda: "Belum ada pesan",
+    tidakDitemukan: "Percakapan tidak ditemukan.",
+    mulai: "Mulai percakapan dengan mengirim pesan.",
+    tulis: "Tulis pesan...",
+    kirim: "Kirim",
+  },
+  en: {
+    judul: "Chat",
+    cari: "Search conversations...",
+    belumAda: "No messages yet",
+    tidakDitemukan: "No conversations found.",
+    mulai: "Start the conversation by sending a message.",
+    tulis: "Type a message...",
+    kirim: "Send",
+  },
 };
 
 const kontakAwal: Kontak[] = [
@@ -23,27 +49,56 @@ const kontakAwal: Kontak[] = [
 
 const pesanAwal: Record<number, Pesan[]> = {
   1: [
-    { id: 1, pengirim: "lawan", isi: "Halo, fitur login sudah aku push ya.", waktu: "13:50" },
-    { id: 2, pengirim: "saya", isi: "Oke, nanti aku pull dulu.", waktu: "13:52" },
+    {
+      id: 1,
+      pengirim: "lawan",
+      isi: {
+        id: "Halo, fitur login sudah aku push ya.",
+        en: "Hello, I've already pushed the login feature.",
+      },
+      waktu: "13:50",
+    },
+    {
+      id: 2,
+      pengirim: "saya",
+      isi: {
+        id: "Oke, nanti aku pull dulu.",
+        en: "Okay, I'll pull it first.",
+      },
+      waktu: "13:52",
+    },
   ],
   2: [
-    { id: 1, pengirim: "lawan", isi: "Jangan lupa kumpulkan laporan UAS.", waktu: "09:10" },
+    {
+      id: 1,
+      pengirim: "lawan",
+      isi: {
+        id: "Jangan lupa kumpulkan laporan UAS.",
+        en: "Don't forget to submit your final exam report.",
+      },
+      waktu: "09:10",
+    },
   ],
   3: [],
 };
 
 function jamSekarang() {
-  return new Date().toLocaleTimeString("id-ID", {
+  return new Date().toLocaleTimeString("en-GB", {
     hour: "2-digit",
     minute: "2-digit",
   });
 }
 
 export default function ChatPage() {
+  const { t: tf } = useForumContent();
+  const lang = tf("id", "en") as Bahasa;
+
+  const t = teks[lang];
+
   const [kontak] = useState<Kontak[]>(kontakAwal);
   const [aktifId, setAktifId] = useState<number>(kontakAwal[0].id);
   const [semuaPesan, setSemuaPesan] = useState<Record<number, Pesan[]>>(pesanAwal);
-  const [teks, setTeks] = useState("");
+  const [isiPesan, setIsiPesan] = useState("");
   const [cari, setCari] = useState("");
   const akhirPesan = useRef<HTMLDivElement>(null);
 
@@ -54,20 +109,19 @@ export default function ChatPage() {
     k.nama.toLowerCase().includes(cari.toLowerCase())
   );
 
-  // scroll otomatis ke pesan paling bawah
   useEffect(() => {
     akhirPesan.current?.scrollIntoView({ behavior: "smooth" });
   }, [pesanAktif.length, aktifId]);
 
   const kirim = (e: FormEvent) => {
     e.preventDefault();
-    const isi = teks.trim();
+    const isi = isiPesan.trim();
     if (!isi) return;
 
     const baru: Pesan = {
       id: Date.now(),
       pengirim: "saya",
-      isi,
+      isi: { id: isi, en: isi },
       waktu: jamSekarang(),
     };
 
@@ -75,18 +129,17 @@ export default function ChatPage() {
       ...lama,
       [aktifId]: [...(lama[aktifId] ?? []), baru],
     }));
-    setTeks("");
+    setIsiPesan("");
   };
 
   return (
-    <div className={styles.halaman}>
+    <div className={styles.halaman} translate="no">
       <div className={styles.wadah}>
-        {/* Daftar kontak */}
         <aside className={styles.daftarKontak}>
-          <h2 className={styles.judul}>Chat</h2>
+          <h2 className={styles.judul}>{t.judul}</h2>
           <input
             className={styles.cari}
-            placeholder="Cari percakapan..."
+            placeholder={t.cari}
             value={cari}
             onChange={(e) => setCari(e.target.value)}
           />
@@ -103,18 +156,17 @@ export default function ChatPage() {
                 <div className={styles.avatar}>{k.nama.charAt(0).toUpperCase()}</div>
                 <div className={styles.infoKontak}>
                   <b>{k.nama}</b>
-                  <span>{terakhir ? terakhir.isi : "Belum ada pesan"}</span>
+                  <span>{terakhir ? terakhir.isi[lang] : t.belumAda}</span>
                 </div>
               </button>
             );
           })}
 
           {kontakTampil.length === 0 && (
-            <p className={styles.kosong}>Percakapan tidak ditemukan.</p>
+            <p className={styles.kosong}>{t.tidakDitemukan}</p>
           )}
         </aside>
 
-        {/* Panel percakapan */}
         <section className={styles.panelChat}>
           <header className={styles.header}>
             <div className={styles.avatar}>
@@ -125,7 +177,7 @@ export default function ChatPage() {
 
           <div className={styles.isiPesan}>
             {pesanAktif.length === 0 && (
-              <p className={styles.kosong}>Mulai percakapan dengan mengirim pesan.</p>
+              <p className={styles.kosong}>{t.mulai}</p>
             )}
 
             {pesanAktif.map((p) => (
@@ -135,7 +187,7 @@ export default function ChatPage() {
                   p.pengirim === "saya" ? styles.saya : styles.lawan
                 }`}
               >
-                <p>{p.isi}</p>
+                <p>{p.isi[lang]}</p>
                 <span className={styles.waktu}>{p.waktu}</span>
               </div>
             ))}
@@ -145,12 +197,12 @@ export default function ChatPage() {
           <form className={styles.formKirim} onSubmit={kirim}>
             <input
               className={styles.inputPesan}
-              placeholder="Tulis pesan..."
-              value={teks}
-              onChange={(e) => setTeks(e.target.value)}
+              placeholder={t.tulis}
+              value={isiPesan}
+              onChange={(e) => setIsiPesan(e.target.value)}
             />
             <button type="submit" className={styles.tombolKirim}>
-              Kirim
+              {t.kirim}
             </button>
           </form>
         </section>
