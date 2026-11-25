@@ -7,6 +7,7 @@ import Footer from "./footer/footer";
 import CameraProfile from "../components/CameraProfile";
 import styles from "./profile.module.css";
 import { useFotoProfil } from "../../lib/fotoprofile";
+
 type Post = {
   id: number;
   judul: string;
@@ -26,7 +27,7 @@ const postAwal: Post[] = [
 ];
 
 export default function ProfilePage() {
-  const [foto, setFoto] = useState("");
+  const { foto, simpanFoto } = useFotoProfil();
   const [showCamera, setShowCamera] = useState(false);
   const [daftarPost, setDaftarPost] = useState<Post[]>(postAwal);
 
@@ -34,12 +35,13 @@ export default function ProfilePage() {
   const email = "graciacs.14052008@gmail.com";
 
   const gantiFoto = (file: File) => {
-    setFoto(URL.createObjectURL(file));
+    const reader = new FileReader();
+    reader.onload = () => simpanFoto(reader.result as string);
+    reader.readAsDataURL(file);
   };
 
-  // hasil jepretan kamera (base64) langsung dipakai sebagai foto profil
   const ambilFoto = (dataUrl: string) => {
-    setFoto(dataUrl);
+    simpanFoto(dataUrl);
   };
 
   const tambahAngka = (id: number, kolom: Kolom) => {
