@@ -2,6 +2,22 @@
   "name": "temp-app",
   "version": "0.1.0",
   "private": true,
+  "description": "",
+  "homepage": "https://github.com/marchikari-hub/Forumly-Front-End#readme",
+  "bugs": {
+    "url": "https://github.com/marchikari-hub/Forumly-Front-End/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marchikari-hub/Forumly-Front-End.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "directories": {
+    "lib": "lib"
+  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,12 +25,17 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "bootstrap": "^5.3.8",
+    "lucide-react": "^1.79.0",
     "next": "14.2.31",
     "react": "^18",
+    "react-bootstrap": "^2.10.10",
     "react-dom": "^18"
   },
   "devDependencies": {
-    "@types/node": "^22.20.5",
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "typescript": "^5"

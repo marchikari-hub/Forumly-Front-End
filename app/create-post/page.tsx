@@ -95,10 +95,8 @@ export default function CreatePostPage() {
               <div className="cp-upload-box">
                 <input type="file" accept="image/*,video/*" onChange={(e) => pickFile(e.target.files?.[0])} />
                 <p>Drag and drop gambar atau video, atau <span>Upload</span></p>
-                  <div id="cp-image-preview">                  {preview && file?.type.startsWith("image/") && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={preview} alt="Preview" />
-                  )}
+                <div>
+                  {preview && file?.type.startsWith("image/") && /* eslint-disable-next-line @next/next/no-img-element */ <img src={preview} alt="Preview" />}
                   {preview && file?.type.startsWith("video/") && <video muted preload="metadata" src={preview + "#t=0.1"} />}
                 </div>
               </div>
