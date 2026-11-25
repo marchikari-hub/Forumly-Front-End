@@ -23,10 +23,6 @@
 }
 
 :where(.fm-page) * {
-.fm-page * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
@@ -263,5 +259,4 @@
   .cp-form-footer button {
     width: 100%;
   }
-}
 }
