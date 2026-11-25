@@ -11,4 +11,4 @@ export type Item = {
   liked: boolean; disliked: boolean; joined: boolean;
 };
 
-export type Comment = { id: number; author: string; text: string };
+export type Comment = { id: number; author: string; text: string; mine: boolean };
