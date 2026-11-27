@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useTheme } from "@/lib/useTheme";
 import "./create-post.css";
 
@@ -20,6 +20,14 @@ export default function CreatePostPage() {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState("");
   const [saving, setSaving] = useState(false);
+  const [communities, setCommunities] = useState<string[]>([]);
+
+useEffect(() => {
+  fetch("/api/communities", { cache: "no-store" })
+    .then((r) => r.json())
+    .then(setCommunities)
+    .catch(() => setCommunities([]));
+}, []);
 
   const pickFile = (f: File | undefined) => {
     setFile(null);
@@ -67,9 +75,9 @@ export default function CreatePostPage() {
         <div className="cp-select-wrapper">
           <select value={community} onChange={(e) => setCommunity(e.target.value)} required>
             <option value="" disabled>Choose a community</option>
-            <option value="r/luckyme">r/luckyme</option>
-            <option value="r/meme">r/meme</option>
-            <option value="r/larpin">r/larpin</option>
+          {communities.map((name) => (
+          <option key={name} value={name}>{name}</option>
+        ))}
           </select>
         </div>
 
