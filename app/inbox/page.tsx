@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import type { Notif } from "@/lib/types";
 import { useTheme } from "@/lib/useTheme";
@@ -9,6 +10,7 @@ import "./inbox.css";
 type Tab = "all" | "unread" | "messages";
 
 export default function InboxPage() {
+  const router = useRouter();
   const theme = useTheme();
   const [list, setList] = useState<Notif[]>([]);
   const [tab, setTab] = useState<Tab>("all");
@@ -16,14 +18,22 @@ export default function InboxPage() {
 
   const load = useCallback(async () => {
     const res = await fetch("/api/inbox", { cache: "no-store" });
+    if (res.status === 401) {
+      router.push("/login");
+      return;
+    }
     setList(await res.json());
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     load();
+    const poll = setInterval(load, 10000);
     const close = () => setOpen(false);
     document.addEventListener("click", close);
-    return () => document.removeEventListener("click", close);
+    return () => {
+      clearInterval(poll);
+      document.removeEventListener("click", close);
+    };
   }, [load]);
 
   const mark = async (body: { id?: number; all?: boolean }) => {
@@ -50,7 +60,10 @@ export default function InboxPage() {
               type="button"
               className="ib-bell-btn"
               aria-label="Notifications"
-              onClick={(e) => { e.stopPropagation(); setOpen((o) => !o); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                setOpen((o) => !o);
+              }}
             >
               🔔 {unreadCount > 0 && <span className="ib-badge" style={{ display: "inline-block" }}>{unreadCount}</span>}
             </button>
@@ -65,11 +78,11 @@ export default function InboxPage() {
                 <a href="#" onClick={(e) => { e.preventDefault(); mark({ all: true }); }}>Mark read</a>
               </div>
               <ul className="ib-preview-list">
-                {list.filter((n) => n.type === "notification").map((n) => (
+                {list.filter((n) => n.type === "notification").slice(0, 5).map((n) => (
                   <li key={n.id} className={`ib-preview-item${n.unread ? " unread" : ""}`}>
                     <p>
-                      <strong>{n.actor}</strong>{" "}
-                      {n.message === "replied to your post in" ? "replied to your post" : `${n.message} ${n.community ?? ""}!`}
+                      <strong>{n.actor}</strong> {n.message}
+                      {n.community && <> {n.community}</>}
                     </p>
                     <span className="time">{n.time}</span>
                   </li>
@@ -100,11 +113,14 @@ export default function InboxPage() {
                   <strong>{n.actor}</strong> {n.message}
                   {n.community && <> <em>{n.community}</em></>}
                 </p>
-                <blockquote className="ib-snippet">&quot;{n.snippet}&quot;</blockquote>
+                {n.snippet && <blockquote className="ib-snippet">&quot;{n.snippet}&quot;</blockquote>}
                 <span className="ib-time">{n.time}</span>
+                {n.postTitle && (
+                  <Link href={"/search?q=" + encodeURIComponent(n.postTitle)} className="ib-reply-link">Lihat post</Link>
+                )}
                 {n.type === "messages" && <Link href="/chat" className="ib-reply-link">Balas lewat Chat</Link>}
               </div>
-              {n.type !== "messages" && (
+              {n.unread && (
                 <button type="button" className="ib-read-btn" title="Mark as read" onClick={() => mark({ id: n.id })}>✓</button>
               )}
             </div>
