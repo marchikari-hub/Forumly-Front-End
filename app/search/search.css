@@ -9,8 +9,7 @@
   --border-color: #e4e6eb;
   --input-bg: #f0f2f5;
 }
-
-.fm-page[data-theme="dark"] {
+[data-theme="dark"] .fm-page {
   --bg-primary: #18191a;
   --bg-card: #242526;
   --text-main: #e4e6eb;

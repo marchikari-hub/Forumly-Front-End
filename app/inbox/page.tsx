@@ -1,29 +1,31 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import type { Notif } from "@/lib/types";
-import { useTheme } from "@/lib/useTheme";
 import "./inbox.css";
 
 type Tab = "all" | "unread" | "messages";
 
 export default function InboxPage() {
-  const theme = useTheme();
+  const router = useRouter();
   const [list, setList] = useState<Notif[]>([]);
   const [tab, setTab] = useState<Tab>("all");
-  const [open, setOpen] = useState(false);
 
   const load = useCallback(async () => {
     const res = await fetch("/api/inbox", { cache: "no-store" });
+    if (res.status === 401) {
+      router.push("/login");
+      return;
+    }
     setList(await res.json());
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     load();
-    const close = () => setOpen(false);
-    document.addEventListener("click", close);
-    return () => document.removeEventListener("click", close);
+    const poll = setInterval(load, 10000);
+    return () => clearInterval(poll);
   }, [load]);
 
   const mark = async (body: { id?: number; all?: boolean }) => {
@@ -38,50 +40,17 @@ export default function InboxPage() {
   const tabs: Tab[] = ["all", "unread", "messages"];
 
   return (
-    <div className="fm-page" data-theme={theme}>
-      <header className="ib-navbar">
-        <Link href="/" className="ib-logo">Forumly</Link>
-
-        <div className="ib-nav-right">
-          <Link href="/create-post" className="ib-nav-link">+ Create Post</Link>
-
-          <div className="ib-dropdown-wrapper">
-            <button
-              type="button"
-              className="ib-bell-btn"
-              aria-label="Notifications"
-              onClick={(e) => { e.stopPropagation(); setOpen((o) => !o); }}
-            >
-              🔔 {unreadCount > 0 && <span className="ib-badge" style={{ display: "inline-block" }}>{unreadCount}</span>}
-            </button>
-
-            <div
-              className="ib-dropdown-content"
-              style={{ display: open ? "block" : "none" }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="ib-dropdown-header">
-                <span>Notifications</span>
-                <a href="#" onClick={(e) => { e.preventDefault(); mark({ all: true }); }}>Mark read</a>
-              </div>
-              <ul className="ib-preview-list">
-                {list.filter((n) => n.type === "notification").map((n) => (
-                  <li key={n.id} className={`ib-preview-item${n.unread ? " unread" : ""}`}>
-                    <p>
-                      <strong>{n.actor}</strong>{" "}
-                      {n.message === "replied to your post in" ? "replied to your post" : `${n.message} ${n.community ?? ""}!`}
-                    </p>
-                    <span className="time">{n.time}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </header>
-
+    <div className="fm-page">
       <main className="ib-container">
-        <h2>Inbox</h2>
+        <div className="ib-head">
+          <h2>
+            Inbox
+            {unreadCount > 0 && <span className="ib-count">{unreadCount}</span>}
+          </h2>
+          <button type="button" className="ib-markall" disabled={unreadCount === 0} onClick={() => mark({ all: true })}>
+            Tandai semua dibaca
+          </button>
+        </div>
 
         <div className="ib-tabs">
           {tabs.map((t) => (
@@ -100,11 +69,14 @@ export default function InboxPage() {
                   <strong>{n.actor}</strong> {n.message}
                   {n.community && <> <em>{n.community}</em></>}
                 </p>
-                <blockquote className="ib-snippet">&quot;{n.snippet}&quot;</blockquote>
+                {n.snippet && <blockquote className="ib-snippet">&quot;{n.snippet}&quot;</blockquote>}
                 <span className="ib-time">{n.time}</span>
+                {n.postTitle && (
+                  <Link href={"/search?q=" + encodeURIComponent(n.postTitle)} className="ib-reply-link">Lihat post</Link>
+                )}
                 {n.type === "messages" && <Link href="/chat" className="ib-reply-link">Balas lewat Chat</Link>}
               </div>
-              {n.type !== "messages" && (
+              {n.unread && (
                 <button type="button" className="ib-read-btn" title="Mark as read" onClick={() => mark({ id: n.id })}>✓</button>
               )}
             </div>
