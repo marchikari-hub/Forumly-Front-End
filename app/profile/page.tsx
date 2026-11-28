@@ -21,6 +21,7 @@ type Post = {
   komentar: number;
   laporan: number;
   asli?: boolean;
+  sudahTidakSuka?: boolean;
 };
 
 type Kolom = "suka" | "tidakSuka" | "komentar" | "laporan";
@@ -83,15 +84,12 @@ export default function ProfilePage() {
       const res = await fetch("/api/search?q=", { cache: "no-store" });
       if (!res.ok) return;
       const data = await res.json();
-      const rows = Array.isArray(data)
+      const rows: Record<string, unknown>[] = Array.isArray(data)
         ? data
         : data.items ?? data.posts ?? data.results ?? [];
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const milik: Post[] = rows
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .filter((r: any) => r.author === nama)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .map((r: any) => ({
+        .filter((r) => r.author === nama)
+        .map((r) => ({
           id: Number(r.id),
           judul: String(r.title ?? ""),
           isi: String(r.content ?? ""),
@@ -102,14 +100,11 @@ export default function ProfilePage() {
           asli: true,
         }));
       if (milik.length > 0) setDaftarPost(milik);
-    } catch {
-      // kalau gagal, tetap pakai post contoh
-    }
+    } catch {}
   };
 
   useEffect(() => {
     muatPost();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const gantiFoto = (file: File) => {
@@ -124,7 +119,15 @@ export default function ProfilePage() {
 
   const tambahAngka = (id: number, kolom: Kolom) => {
     setDaftarPost((lama) =>
-      lama.map((p) => (p.id === id ? { ...p, [kolom]: p[kolom] + 1 } : p))
+      lama.map((p) => {
+        if (p.id !== id) return p;
+        if (kolom === "tidakSuka") {
+          return p.sudahTidakSuka
+            ? { ...p, tidakSuka: p.tidakSuka - 1, sudahTidakSuka: false }
+            : { ...p, tidakSuka: p.tidakSuka + 1, sudahTidakSuka: true };
+        }
+        return { ...p, [kolom]: p[kolom] + 1 };
+      })
     );
   };
 
