@@ -3,13 +3,11 @@
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Comment, CommentHit, Item, UserHit } from "@/lib/types";
-import { useTheme } from "@/lib/useTheme";
 import "./search.css";
 
 type Tab = "all" | "posts" | "community" | "comments" | "users";
 
 function SearchView() {
-  const theme = useTheme();
   const router = useRouter();
   const q = (useSearchParams().get("q") || "").trim();
   const [input, setInput] = useState(q);
@@ -23,6 +21,13 @@ function SearchView() {
   const [reportItem, setReportItem] = useState<Item | null>(null);
   const [reason, setReason] = useState("spam");
   const [toast, setToast] = useState("");
+  const [lang, setLang] = useState<"id" | "en">("id");
+
+  useEffect(() => {
+    try {
+      if (localStorage.getItem("forumly_lang_v1") === "en") setLang("en");
+    } catch {}
+  }, []);
 
   const load = useCallback(async () => {
     const res = await fetch("/api/search?q=" + encodeURIComponent(q), { cache: "no-store" });
@@ -98,11 +103,32 @@ function SearchView() {
   const showComments = tab === "all" || tab === "comments";
   const showUsers = tab === "all" || tab === "users";
   const isEmpty =
-    shownItems.length === 0 &&
+    shownItems.length === 0&&
     (!showComments || commentHits.length === 0) &&
     (!showUsers || users.length === 0);
 
+  const titleOf = (it: Item) => (lang === "en" ? it.titleEn : it.title);
+  const metaOf = (it: Item) => (lang === "en" ? it.metaEn : it.meta);
+
   const body = (it: Item) => {
+    const text = lang === "en" ? it.contentEn : it.content;
+    if (it.imageUrl) {
+      return (
+        <>
+          {text}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={it.imageUrl} alt={titleOf(it)} />
+        </>
+      );
+    }
+    if (it.videoUrl) {
+      return (
+        <>
+          {text}
+          <video controls preload="metadata" src={it.videoUrl} />
+        </>
+      );
+    }
     if (it.hasMedia) {
       return it.mediaType?.startsWith("video/") ? (
         <video controls preload="metadata" src={`/api/media/${it.id}`} />
@@ -114,11 +140,11 @@ function SearchView() {
     if (it.kind === "link" && /^https?:\/\/\S+$/i.test(it.content)) {
       return <a href={it.content} target="_blank" rel="noopener noreferrer">{it.content}</a>;
     }
-    return it.content;
+    return text;
   };
 
   return (
-    <div className="fm-page" data-theme={theme}>
+    <div className="fm-page">
       <main className="sr-container">
         <form
           className="sr-search-form"
@@ -150,9 +176,9 @@ function SearchView() {
             <div key={it.id} className="sr-card">
               <div className="sr-card-header">
                 <span className="sr-subreddit">{it.community}</span>
-                <span className="sr-author">{" "}• {it.meta.trim()}</span>
+                <span className="sr-author">{" "}• {metaOf(it).trim()}</span>
               </div>
-              <h3 className="sr-title">{it.title}</h3>
+              <h3 className="sr-title">{titleOf(it)}</h3>
               <p className="sr-snippet">{body(it)}</p>
               <div className="sr-card-footer">
                 {it.category === "community" ? (
@@ -231,7 +257,7 @@ function SearchView() {
       <div className={`sr-modal${thread ? " show" : ""}`} onClick={(e) => e.target === e.currentTarget && setThread(null)}>
         <div className="sr-modal-card">
           <div className="sr-modal-header">
-            <h3>{thread?.title}</h3>
+            <h3>{thread ? titleOf(thread) : ""}</h3>
             <button type="button" onClick={() => setThread(null)}>&times;</button>
           </div>
           <div>
@@ -265,7 +291,7 @@ function SearchView() {
             <h3>Laporkan Konten</h3>
             <button type="button" onClick={() => setReportItem(null)}>&times;</button>
           </div>
-          <p>{reportItem ? "Laporkan: " + reportItem.title : "Pilih alasan melaporkan:"}</p>
+          <p>{reportItem ? "Laporkan: " + titleOf(reportItem) : "Pilih alasan melaporkan:"}</p>
           <select className="sr-report-select" value={reason} onChange={(e) => setReason(e.target.value)}>
             <option value="spam">Spam / Penipuan</option>
             <option value="hate">Ujaran Kebencian / SARA</option>
