@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
-import { useTheme } from "@/lib/useTheme";
 import "./create-post.css";
 
 type Tab = "text" | "media" | "link";
@@ -11,7 +10,6 @@ const MAX_VIDEO = 50 * 1024 * 1024;
 
 export default function CreatePostPage() {
   const router = useRouter();
-  const theme = useTheme();
   const [community, setCommunity] = useState("");
   const [tab, setTab] = useState<Tab>("text");
   const [title, setTitle] = useState("");
@@ -22,12 +20,12 @@ export default function CreatePostPage() {
   const [saving, setSaving] = useState(false);
   const [communities, setCommunities] = useState<string[]>([]);
 
-useEffect(() => {
-  fetch("/api/communities", { cache: "no-store" })
-    .then((r) => r.json())
-    .then(setCommunities)
-    .catch(() => setCommunities([]));
-}, []);
+  useEffect(() => {
+    fetch("/api/communities", { cache: "no-store" })
+      .then((r) => r.json())
+      .then(setCommunities)
+      .catch(() => setCommunities([]));
+  }, []);
 
   const pickFile = (f: File | undefined) => {
     setFile(null);
@@ -68,16 +66,16 @@ useEffect(() => {
   const tabs: [Tab, string][] = [["text", "Post"], ["media", "Images & Video"], ["link", "Link"]];
 
   return (
-    <div className="fm-page" data-theme={theme}>
+    <div className="fm-page">
       <main className="cp-container">
         <h2>Create a post</h2>
 
         <div className="cp-select-wrapper">
           <select value={community} onChange={(e) => setCommunity(e.target.value)} required>
             <option value="" disabled>Choose a community</option>
-          {communities.map((name) => (
-          <option key={name} value={name}>{name}</option>
-        ))}
+            {communities.map((name) => (
+              <option key={name} value={name}>{name}</option>
+            ))}
           </select>
         </div>
 
@@ -104,7 +102,7 @@ useEffect(() => {
               <div className="cp-upload-box">
                 <input type="file" accept="image/*,video/*" onChange={(e) => pickFile(e.target.files?.[0])} />
                 <p>Drag and drop gambar atau video, atau <span>Upload</span></p>
-                <div>
+                <div id="cp-image-preview">
                   {preview && file?.type.startsWith("image/") && /* eslint-disable-next-line @next/next/no-img-element */ <img src={preview} alt="Preview" />}
                   {preview && file?.type.startsWith("video/") && <video muted preload="metadata" src={preview + "#t=0.1"} />}
                 </div>

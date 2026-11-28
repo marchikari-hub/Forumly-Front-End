@@ -4,14 +4,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import type { Notif } from "@/lib/types";
-import { useTheme } from "@/lib/useTheme";
 import "./inbox.css";
 
 type Tab = "all" | "unread" | "messages";
 
 export default function InboxPage() {
   const router = useRouter();
-  const theme = useTheme();
   const [list, setList] = useState<Notif[]>([]);
   const [tab, setTab] = useState<Tab>("all");
   const [open, setOpen] = useState(false);
@@ -48,7 +46,7 @@ export default function InboxPage() {
   const tabs: Tab[] = ["all", "unread", "messages"];
 
   return (
-    <div className="fm-page" data-theme={theme}>
+    <div className="fm-page">
       <header className="ib-navbar">
         <Link href="/" className="ib-logo">Forumly</Link>
 
