@@ -21,6 +21,7 @@ type Post = {
   komentar: number;
   laporan: number;
   asli?: boolean;
+  sudahSuka?: boolean;
   sudahTidakSuka?: boolean;
 };
 
@@ -121,6 +122,11 @@ export default function ProfilePage() {
     setDaftarPost((lama) =>
       lama.map((p) => {
         if (p.id !== id) return p;
+        if (kolom === "suka") {
+          return p.sudahSuka
+            ? { ...p, suka: p.suka - 1, sudahSuka: false }
+            : { ...p, suka: p.suka + 1, sudahSuka: true };
+        }
         if (kolom === "tidakSuka") {
           return p.sudahTidakSuka
             ? { ...p, tidakSuka: p.tidakSuka - 1, sudahTidakSuka: false }
