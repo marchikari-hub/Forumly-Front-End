@@ -23,24 +23,37 @@ function addColumn(db: DatabaseSync, table: string, column: string, definition: 
 }
 
 function seedStatic(db: DatabaseSync) {
-  const has = db.prepare("SELECT 1 FROM items WHERE source_id = ?");
+  const find = db.prepare("SELECT id FROM items WHERE source_id = ?");
   const insItem = db.prepare(
-    "INSERT INTO items (category,community,author,meta,title,content,base_likes,created_at,source_id) VALUES (?,?,?,?,?,?,?,?,?)"
+    "INSERT INTO items (category,community,author,meta,title,content,base_likes,created_at,source_id,title_en,content_en,meta_en,image_url,video_url) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+  );
+  const updItem = db.prepare(
+    "UPDATE items SET community=?, author=?, meta=?, title=?, content=?, base_likes=?, title_en=?, content_en=?, meta_en=?, image_url=?, video_url=? WHERE source_id=?"
   );
   const insComment = db.prepare("INSERT INTO comments (item_id,author,text,created_at) VALUES (?,?,?,?)");
   const now = Date.now();
 
   INITIAL_POSTS.forEach((p, i) => {
-    if (has.get(p.id)) return;
+    const meta = `Posted by ${p.author} ${p.timeId}`;
+    const metaEn = `Posted by ${p.author} ${p.timeEn}`;
+    const image = p.imageUrl ?? null;
+    const video = p.videoUrl ?? null;
+    const existing = find.get(p.id) as { id: number } | undefined;
+
+    if (existing) {
+      updItem.run(p.genreId, p.author, meta, p.titleId, p.excerptId, p.likes, p.titleEn, p.excerptEn, metaEn, image, video, p.id);
+      return;
+    }
+
     const at = now - (i + 1) * 3600e3;
-    const r = insItem.run("posts", p.genreId, p.author, `Posted by ${p.author} ${p.timeId}`, p.titleId, p.excerptId, p.likes, at, p.id);
+    const r = insItem.run("posts", p.genreId, p.author, meta, p.titleId, p.excerptId, p.likes, at, p.id, p.titleEn, p.excerptEn, metaEn, image, video);
     const itemId = Number(r.lastInsertRowid);
     p.comments.forEach((c, j) => insComment.run(itemId, c.author, c.text, at + (j + 1) * 60e3));
   });
 
   INITIAL_COMMUNITIES.forEach((c) => {
-    if (has.get(c.id)) return;
-    insItem.run("community", `r/${c.slug}`, null, `${c.members} Members`, c.nameId, c.descId, 0, now, c.id);
+    if (find.get(c.id)) return;
+    insItem.run("community", `r/${c.slug}`, null, `${c.members} Members`, c.nameId, c.descId, 0, now, c.id, c.nameEn, c.descEn, `${c.members} Members`, null, null);
   });
 }
 
@@ -82,6 +95,11 @@ function init(): DatabaseSync {
   addColumn(db, "notifications", "user", "TEXT");
   addColumn(db, "notifications", "item_id", "INTEGER");
   addColumn(db, "items", "source_id", "TEXT");
+  addColumn(db, "items", "title_en", "TEXT");
+  addColumn(db, "items", "content_en", "TEXT");
+  addColumn(db, "items", "meta_en", "TEXT");
+  addColumn(db, "items", "image_url", "TEXT");
+  addColumn(db, "items", "video_url", "TEXT");
 
   if (count(db, "users") === 0) {
     db.prepare("INSERT INTO users (username,password_hash,created_at) VALUES (?,?,?)")
