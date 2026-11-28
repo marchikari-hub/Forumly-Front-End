@@ -18,6 +18,11 @@ export type Item = {
   meta: string;
   title: string;
   content: string;
+  titleEn: string;
+  contentEn: string;
+  metaEn: string;
+  imageUrl: string | null;
+  videoUrl: string | null;
   kind: string;
   hasMedia: boolean;
   mediaType: string | null;
