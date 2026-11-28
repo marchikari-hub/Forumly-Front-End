@@ -2,16 +2,19 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getUser, unauthorized } from "@/lib/auth";
 import { notify } from "@/lib/notify";
+import { findItemId, notFound } from "@/lib/validate";
 
 export async function POST(req: Request, { params }: { params: { id: string } }) {
   const me = await getUser();
   if (!me) return unauthorized();
 
+  const id = findItemId(params.id);
+  if (id === null) return notFound();
+
   const { type } = await req.json();
   if (type !== "like" && type !== "dislike") {
     return NextResponse.json({ error: "bad type" }, { status: 400 });
   }
-  const id = Number(params.id);
   const other = type === "like" ? "dislike" : "like";
   const has = db.prepare("SELECT 1 FROM reactions WHERE item_id=? AND user=? AND type=?").get(id, me, type);
 

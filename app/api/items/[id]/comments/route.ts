@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 import { getUser, unauthorized } from "@/lib/auth";
 import { notify } from "@/lib/notify";
+import { findItemId, notFound } from "@/lib/validate";
 
 export const dynamic = "force-dynamic";
 
@@ -19,11 +20,13 @@ export async function POST(req: Request, { params }: { params: { id: string } })
   const me = await getUser();
   if (!me) return unauthorized();
 
+  const id = findItemId(params.id, "posts");
+  if (id === null) return notFound();
+
   const { text } = await req.json();
   const t = String(text || "").trim();
   if (!t) return NextResponse.json({ error: "empty" }, { status: 400 });
 
-  const id = Number(params.id);
   db.prepare("INSERT INTO comments (item_id,author,text,created_at) VALUES (?,?,?,?)").run(id, me, t, Date.now());
 
   const item = db.prepare("SELECT author, community FROM items WHERE id = ?").get(id) as
