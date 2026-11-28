@@ -12,7 +12,6 @@ export default function InboxPage() {
   const router = useRouter();
   const [list, setList] = useState<Notif[]>([]);
   const [tab, setTab] = useState<Tab>("all");
-  const [open, setOpen] = useState(false);
 
   const load = useCallback(async () => {
     const res = await fetch("/api/inbox", { cache: "no-store" });
@@ -26,12 +25,7 @@ export default function InboxPage() {
   useEffect(() => {
     load();
     const poll = setInterval(load, 10000);
-    const close = () => setOpen(false);
-    document.addEventListener("click", close);
-    return () => {
-      clearInterval(poll);
-      document.removeEventListener("click", close);
-    };
+    return () => clearInterval(poll);
   }, [load]);
 
   const mark = async (body: { id?: number; all?: boolean }) => {
@@ -47,52 +41,16 @@ export default function InboxPage() {
 
   return (
     <div className="fm-page">
-      <header className="ib-navbar">
-        <Link href="/" className="ib-logo">Forumly</Link>
-
-        <div className="ib-nav-right">
-          <Link href="/create-post" className="ib-nav-link">+ Create Post</Link>
-
-          <div className="ib-dropdown-wrapper">
-            <button
-              type="button"
-              className="ib-bell-btn"
-              aria-label="Notifications"
-              onClick={(e) => {
-                e.stopPropagation();
-                setOpen((o) => !o);
-              }}
-            >
-              🔔 {unreadCount > 0 && <span className="ib-badge" style={{ display: "inline-block" }}>{unreadCount}</span>}
-            </button>
-
-            <div
-              className="ib-dropdown-content"
-              style={{ display: open ? "block" : "none" }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="ib-dropdown-header">
-                <span>Notifications</span>
-                <a href="#" onClick={(e) => { e.preventDefault(); mark({ all: true }); }}>Mark read</a>
-              </div>
-              <ul className="ib-preview-list">
-                {list.filter((n) => n.type === "notification").slice(0, 5).map((n) => (
-                  <li key={n.id} className={`ib-preview-item${n.unread ? " unread" : ""}`}>
-                    <p>
-                      <strong>{n.actor}</strong> {n.message}
-                      {n.community && <> {n.community}</>}
-                    </p>
-                    <span className="time">{n.time}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      </header>
-
       <main className="ib-container">
-        <h2>Inbox</h2>
+        <div className="ib-head">
+          <h2>
+            Inbox
+            {unreadCount > 0 && <span className="ib-count">{unreadCount}</span>}
+          </h2>
+          <button type="button" className="ib-markall" disabled={unreadCount === 0} onClick={() => mark({ all: true })}>
+            Tandai semua dibaca
+          </button>
+        </div>
 
         <div className="ib-tabs">
           {tabs.map((t) => (
