@@ -1,25 +1,25 @@
-/* ===== Mode terang (default) ===== */
 .halaman {
-  --bg: #f3f4f6;
+  --bg: #ffffff;
   --panel: #ffffff;
-  --panel-2: #f9fafb;
-  --border: #e5e7eb;
-  --input-border: #d1d5db;
+  --panel-2: #ffffff;
+  --border: #dbdbdb;
+  --input-border: #dbdbdb;
   --text: #111827;
-  --muted: #6b7280;
-  --accent: #00a8ff;
-  --accent-hover: #0090dd;
-  --hover: #f3f4f6;
-  --active: #e0f4ff;
-  --bubble-me-bg: #00a8ff;
+  --muted: #8e8e8e;
+  --accent: #a033ff;
+  --accent-hover: #8a24e0;
+  --hover: #fafafa;
+  --active: #f1e6fc;
+  --bubble-me-bg: linear-gradient(135deg, #6a5cff, #a033ff, #ff5280);
   --bubble-me-text: #ffffff;
-  --bubble-other-bg: #ffffff;
-  --judul-color: #00a8ff;
+  --bubble-other-bg: #efefef;
+  --judul-color: #a033ff;
   --judul-bg: none;
-  --avatar-bg: #00a8ff;
+  --avatar-bg: linear-gradient(135deg, #6a5cff, #a033ff, #ff5280);
   --avatar-text: #ffffff;
   --glow: none;
   --blur: none;
+  --grad-size: 100% 100%;
 
   padding: 24px;
   background: var(--bg);
@@ -27,34 +27,33 @@
   min-height: 100vh;
 }
 
-/* ===== Mode gelap: hologram ===== */
 :global([data-theme="dark"]) .halaman {
-  --bg: radial-gradient(circle at 15% 20%, rgba(0, 240, 255, 0.22), transparent 45%),
-    radial-gradient(circle at 85% 80%, rgba(255, 79, 216, 0.22), transparent 45%),
-    radial-gradient(circle at 50% 50%, rgba(138, 92, 255, 0.18), transparent 60%),
+  --bg: radial-gradient(circle at 15% 20%, rgba(106, 92, 255, 0.22), transparent 45%),
+    radial-gradient(circle at 85% 80%, rgba(255, 82, 128, 0.22), transparent 45%),
+    radial-gradient(circle at 50% 50%, rgba(160, 51, 255, 0.18), transparent 60%),
     #05010f;
   --panel: rgba(20, 12, 55, 0.55);
   --panel-2: rgba(8, 4, 30, 0.45);
-  --border: rgba(0, 240, 255, 0.35);
-  --input-border: rgba(138, 92, 255, 0.6);
+  --border: rgba(160, 51, 255, 0.35);
+  --input-border: rgba(106, 92, 255, 0.6);
   --text: #e8f7ff;
   --muted: #9ab8d9;
-  --accent: #00f0ff;
-  --accent-hover: #7df9ff;
-  --hover: rgba(0, 240, 255, 0.1);
-  --active: rgba(138, 92, 255, 0.28);
-  --bubble-me-bg: linear-gradient(135deg, #00f0ff, #8a5cff, #ff4fd8);
-  --bubble-me-text: #06031a;
-  --bubble-other-bg: rgba(0, 240, 255, 0.08);
+  --accent: #a033ff;
+  --accent-hover: #c27bff;
+  --hover: rgba(160, 51, 255, 0.1);
+  --active: rgba(106, 92, 255, 0.28);
+  --bubble-me-bg: linear-gradient(135deg, #6a5cff, #a033ff, #ff5280);
+  --bubble-me-text: #ffffff;
+  --bubble-other-bg: rgba(255, 255, 255, 0.08);
   --judul-color: transparent;
-  --judul-bg: linear-gradient(90deg, #00f0ff, #8a5cff, #ff4fd8);
-  --avatar-bg: linear-gradient(135deg, #00f0ff, #8a5cff, #ff4fd8);
-  --avatar-text: #06031a;
-  --glow: 0 0 22px rgba(0, 240, 255, 0.35), inset 0 0 28px rgba(138, 92, 255, 0.18);
+  --judul-bg: linear-gradient(90deg, #6a5cff, #a033ff, #ff5280);
+  --avatar-bg: linear-gradient(135deg, #6a5cff, #a033ff, #ff5280);
+  --avatar-text: #ffffff;
+  --glow: 0 0 22px rgba(160, 51, 255, 0.35), inset 0 0 28px rgba(106, 92, 255, 0.18);
   --blur: blur(14px);
+  --grad-size: 200% 200%;
 }
 
-/* ===== Layout ===== */
 .wadah {
   position: relative;
   display: grid;
@@ -68,7 +67,6 @@
   overflow: hidden;
 }
 
-/* kolom kiri */
 .daftarKontak {
   border-right: 1px solid var(--border);
   padding: 16px;
@@ -144,7 +142,7 @@
   height: 42px;
   border-radius: 50%;
   background: var(--avatar-bg);
-  background-size: 200% 200%;
+  background-size: var(--grad-size);
   color: var(--avatar-text);
   display: flex;
   align-items: center;
@@ -152,7 +150,6 @@
   font-weight: bold;
 }
 
-/* kolom kanan */
 .panelChat {
   display: flex;
   flex-direction: column;
@@ -191,7 +188,7 @@
 .saya {
   align-self: flex-end;
   background: var(--bubble-me-bg);
-  background-size: 200% 200%;
+  background-size: var(--grad-size);
   color: var(--bubble-me-text);
   border-bottom-right-radius: 4px;
   box-shadow: var(--glow);
@@ -237,7 +234,7 @@
 
 .tombolKirim {
   background: var(--bubble-me-bg);
-  background-size: 200% 200%;
+  background-size: var(--grad-size);
   color: var(--bubble-me-text);
   border: none;
   border-radius: 999px;
@@ -251,7 +248,6 @@
   filter: brightness(1.15);
 }
 
-/* ===== Efek hologram (hanya mode gelap) ===== */
 @keyframes holoGeser {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
@@ -265,7 +261,6 @@
   animation: holoGeser 6s ease infinite;
 }
 
-/* garis scan tipis seperti proyeksi hologram */
 :global([data-theme="dark"]) .wadah::after {
   content: "";
   position: absolute;
@@ -273,8 +268,8 @@
   pointer-events: none;
   background: repeating-linear-gradient(
     to bottom,
-    rgba(0, 240, 255, 0.04) 0,
-    rgba(0, 240, 255, 0.04) 1px,
+    rgba(160, 51, 255, 0.04) 0,
+    rgba(160, 51, 255, 0.04) 1px,
     transparent 1px,
     transparent 4px
   );
