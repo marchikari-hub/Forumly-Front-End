@@ -2,6 +2,7 @@ import { DatabaseSync } from "node:sqlite";
 import path from "path";
 import fs from "fs";
 import { hashPassword } from "./password";
+import { INITIAL_POSTS, INITIAL_COMMUNITIES } from "@/app/data/forumData";
 
 export const ME = "Gracia";
 
@@ -12,6 +13,48 @@ const g = globalThis as unknown as { forumlyDb?: DatabaseSync };
 
 function count(db: DatabaseSync, table: string): number {
   return (db.prepare(`SELECT COUNT(*) c FROM ${table}`).get() as { c: number }).c;
+}
+
+function addColumn(db: DatabaseSync, table: string, column: string, definition: string) {
+  const cols = db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[];
+  if (!cols.some((c) => c.name === column)) {
+    db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  }
+}
+
+function seedStatic(db: DatabaseSync) {
+  const find = db.prepare("SELECT id FROM items WHERE source_id = ?");
+  const insItem = db.prepare(
+    "INSERT INTO items (category,community,author,meta,title,content,base_likes,created_at,source_id,title_en,content_en,meta_en,image_url,video_url) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)"
+  );
+  const updItem = db.prepare(
+    "UPDATE items SET community=?, author=?, meta=?, title=?, content=?, base_likes=?, title_en=?, content_en=?, meta_en=?, image_url=?, video_url=? WHERE source_id=?"
+  );
+  const insComment = db.prepare("INSERT INTO comments (item_id,author,text,created_at) VALUES (?,?,?,?)");
+  const now = Date.now();
+
+  INITIAL_POSTS.forEach((p, i) => {
+    const meta = `Posted by ${p.author} ${p.timeId}`;
+    const metaEn = `Posted by ${p.author} ${p.timeEn}`;
+    const image = p.imageUrl ?? null;
+    const video = p.videoUrl ?? null;
+    const existing = find.get(p.id) as { id: number } | undefined;
+
+    if (existing) {
+      updItem.run(p.genreId, p.author, meta, p.titleId, p.excerptId, p.likes, p.titleEn, p.excerptEn, metaEn, image, video, p.id);
+      return;
+    }
+
+    const at = now - (i + 1) * 3600e3;
+    const r = insItem.run("posts", p.genreId, p.author, meta, p.titleId, p.excerptId, p.likes, at, p.id, p.titleEn, p.excerptEn, metaEn, image, video);
+    const itemId = Number(r.lastInsertRowid);
+    p.comments.forEach((c, j) => insComment.run(itemId, c.author, c.text, at + (j + 1) * 60e3));
+  });
+
+  INITIAL_COMMUNITIES.forEach((c) => {
+    if (find.get(c.id)) return;
+    insItem.run("community", `r/${c.slug}`, null, `${c.members} Members`, c.nameId, c.descId, 0, now, c.id, c.nameEn, c.descEn, `${c.members} Members`, null, null);
+  });
 }
 
 function init(): DatabaseSync {
@@ -25,18 +68,18 @@ function init(): DatabaseSync {
       created_at INTEGER
     );
     CREATE TABLE IF NOT EXISTS notifications (
-      id INTEGER PRIMARY KEY, type TEXT NOT NULL, icon TEXT, actor TEXT,
-      message TEXT, community TEXT, snippet TEXT, created_at INTEGER,
+      id INTEGER PRIMARY KEY, user TEXT, type TEXT NOT NULL, icon TEXT, actor TEXT,
+      message TEXT, community TEXT, snippet TEXT, item_id INTEGER, created_at INTEGER,
       is_read INTEGER DEFAULT 0
     );
     CREATE TABLE IF NOT EXISTS items (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      category TEXT NOT NULL,            -- posts | community | comments
+      category TEXT NOT NULL,
       community TEXT, author TEXT, meta TEXT, title TEXT NOT NULL,
-      content TEXT, kind TEXT DEFAULT 'text',   -- text | media | link
+      content TEXT, kind TEXT DEFAULT 'text',
       base_likes INTEGER DEFAULT 0,
       media BLOB, media_type TEXT, media_name TEXT,
-      created_at INTEGER
+      created_at INTEGER, source_id TEXT
     );
     CREATE TABLE IF NOT EXISTS reactions (
       item_id INTEGER, user TEXT, type TEXT, reason TEXT,
@@ -49,33 +92,40 @@ function init(): DatabaseSync {
     CREATE TABLE IF NOT EXISTS joined (user TEXT, item_id INTEGER, PRIMARY KEY (user, item_id));
   `);
 
+  addColumn(db, "notifications", "user", "TEXT");
+  addColumn(db, "notifications", "item_id", "INTEGER");
+  addColumn(db, "items", "source_id", "TEXT");
+  addColumn(db, "items", "title_en", "TEXT");
+  addColumn(db, "items", "content_en", "TEXT");
+  addColumn(db, "items", "meta_en", "TEXT");
+  addColumn(db, "items", "image_url", "TEXT");
+  addColumn(db, "items", "video_url", "TEXT");
+
   if (count(db, "users") === 0) {
     db.prepare("INSERT INTO users (username,password_hash,created_at) VALUES (?,?,?)")
       .run(ME, hashPassword(process.env.SEED_PASSWORD || "gracia123"), Date.now());
   }
 
+  db.exec(`
+    DELETE FROM items WHERE source_id IS NULL AND author IS NOT NULL AND author NOT IN (SELECT username FROM users);
+    DELETE FROM items WHERE source_id IS NULL AND category IN ('community','comments');
+    DELETE FROM comments WHERE item_id NOT IN (SELECT id FROM items);
+    DELETE FROM reactions WHERE item_id NOT IN (SELECT id FROM items);
+    DELETE FROM joined WHERE item_id NOT IN (SELECT id FROM items);
+  `);
+
+  seedStatic(db);
+
   if (count(db, "notifications") === 0) {
     const now = Date.now();
     const n = db.prepare(
-      "INSERT INTO notifications (type,icon,actor,message,community,snippet,created_at,is_read) VALUES (?,?,?,?,?,?,?,?)"
+      "INSERT INTO notifications (user,type,icon,actor,message,community,snippet,created_at,is_read) VALUES (?,?,?,?,?,?,?,?,?)"
     );
-    n.run("notification", "👤", "u/kang_kung", "replied to your post in", "r/indonesia", "Mantap bro, tutorialnya gacor banget!", now - 5 * 60e3, 0);
-    n.run("notification", "🤖", "u/AutoModerator", "welcome to", "r/webdev", "Please read the rules before posting.", now - 3600e3, 0);
-    n.run("messages", "💬", "u/kang_kung", "sent you a direct message", null, "Bowleh minta tips bikin dropdown pakai jQuery?", now - 86400e3, 1);
+    n.run(ME, "notification", "🤖", "u/AutoModerator", "welcome to", "Forumly", "Please read the rules before posting.", now - 3600e3, 0);
+    n.run(ME, "messages", "💬", "u/kang_kung", "sent you a direct message", null, "Bowleh minta tips bikin dropdown pakai jQuery?", now - 86400e3, 1);
   }
+  db.prepare("UPDATE notifications SET user = ? WHERE user IS NULL").run(ME);
 
-  if (count(db, "items") === 0) {
-    const h = 3600e3, now = Date.now();
-    const i = db.prepare(
-      "INSERT INTO items (category,community,author,meta,title,content,base_likes,created_at) VALUES (?,?,?,?,?,?,?,?)"
-    );
-    i.run("posts", "Teknologi", "Budi Setiwan", "Posted by Budi Setiwan 2 jam lalu", "Tips belajar struktur data dan algoritma untuk persiapan praktikum minggu depan?", "Lagi persiapan ujian modul pohon (tree) dan graf. Ada saran visualisasi algoritma atau metode latihan yang efektif?", 14, now - 2 * h);
-    i.run("posts", "Anime", "Rian Pratama", "Posted by Rian Pratama 4 jam lalu", "Anime Spring Season 2026 mana yang paling worth it buat diikuti?", "Musim ini lumayan banyak rilis sekuel dan adaptasi baru. Mau minta rekomendasi anime genre misteri atau slice of life.", 28, now - 4 * h);
-    i.run("posts", "r/vitaminme", "wowonheean", "Posted by wowonheean 12 hours ago", "Kenawhy idol itu cape?", "I see mereka have fun aja tapi kenapa keliatanya kaya tekanan bagong?", 888, now - 12 * h);
-    i.run("posts", "r/indonesia", "Mymintz", "Posted by Mymintz 10 hours ago", "Tutorial kena ban laptop", "Step 1 buka file explorer dan search windows lalu delete and done.", 10000, now - 10 * h);
-    i.run("community", "r/Gllitz", null, "55M Members", "Komunitas Pecinta Illit", "Subreddit untuk para penggemar Illit berbagi dan berdiskusi.", 0, now);
-    i.run("comments", "r/indonesia", "Mymintz", "Comment by Mymintz 9 hours ago", "Re: Tutorial kena ban laptop", "Jangan dicoba di laptop kantor ya, nanti beneran kena ban.", 420, now - 9 * h);
-  }
   return db;
 }
 

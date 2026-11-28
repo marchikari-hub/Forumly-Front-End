@@ -63,11 +63,14 @@ export default function Sidebar() {
           </Link>
 
           <span className="nav-title">{t("HALAMAN UTAMA", "MAIN PAGES")}</span>
-         <Link href="/posts" className={`nav-item ${pathname === "/posts" ? "active" : ""}`}>
+          <Link href="/posts" className={`nav-item ${pathname === "/posts" ? "active" : ""}`}>
             {t("Postingan", "Posts")}
           </Link>
           <Link href="/saved" className={`nav-item ${pathname === "/saved" ? "active" : ""}`}>
             {t("Tersimpan", "Saved")}
+          </Link>
+          <Link href="/search" className={`nav-item ${pathname === "/search" ? "active" : ""}`}>
+          {t("Pencarian", "Search")}
           </Link>
           <Link
             href="/create-post"
