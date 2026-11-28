@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 export async function GET(req: Request) {
   const me = (await getUser()) ?? "";
   const q = (new URL(req.url).searchParams.get("q") || "").trim().toLowerCase();
-  const like = `%${q}%`;
+  const like = `%${q.replace(/[\\%_]/g, "\\$&")}%`;
 
   const rows = db
     .prepare(
@@ -20,7 +20,7 @@ export async function GET(req: Request) {
         EXISTS(SELECT 1 FROM reactions r WHERE r.item_id=i.id AND r.type='dislike' AND r.user=?) AS disliked,
         EXISTS(SELECT 1 FROM joined j WHERE j.item_id=i.id AND j.user=?) AS joined
        FROM items i
-       WHERE (? = '' OR lower(i.title || ' ' || ifnull(i.content,'') || ' ' || ifnull(i.title_en,'') || ' ' || ifnull(i.content_en,'') || ' ' || ifnull(i.community,'') || ' ' || ifnull(i.meta,'')) LIKE ?)
+       WHERE (? = '' OR lower(i.title || ' ' || ifnull(i.content,'') || ' ' || ifnull(i.title_en,'') || ' ' || ifnull(i.content_en,'') || ' ' || ifnull(i.community,'') || ' ' || ifnull(i.meta,'')) LIKE ? ESCAPE '\\')
        ORDER BY i.created_at DESC, i.id DESC`
     )
     .all(me, me, me, q, like) as any[];
@@ -55,7 +55,7 @@ export async function GET(req: Request) {
         (SELECT COUNT(*) FROM items i WHERE i.author = u.username AND i.category = 'posts') AS posts,
         (SELECT COUNT(*) FROM comments c WHERE c.author = u.username) AS comments
        FROM users u
-       WHERE (? = '' OR lower(u.username) LIKE ?)
+       WHERE (? = '' OR lower(u.username) LIKE ? ESCAPE '\\')
        ORDER BY u.username`
     )
     .all(q, like) as UserHit[];
@@ -65,7 +65,7 @@ export async function GET(req: Request) {
       `SELECT c.id, c.author, c.text, i.id AS post_id, i.title AS post_title
        FROM comments c
        JOIN items i ON i.id = c.item_id
-       WHERE (? = '' OR lower(c.text || ' ' || c.author) LIKE ?)
+       WHERE (? = '' OR lower(c.text || ' ' || c.author) LIKE ? ESCAPE '\\')
        ORDER BY c.created_at DESC, c.id DESC`
     )
     .all(q, like) as any[];
