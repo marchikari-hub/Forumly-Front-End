@@ -81,6 +81,9 @@ const postAwal: Post[] = [
   },
 ];
 
+const KUNCI_KOMENTAR = "forumly_profil_komentar_v1";
+const KUNCI_POST = "forumly_profil_post_v1";
+
 const kirimJson = (url: string, body: object) =>
   fetch(url, {
     method: "POST",
@@ -91,11 +94,11 @@ const kirimJson = (url: string, body: object) =>
 const gayaKotakKomentar = {
   flex: 1,
   padding: "10px 14px",
+  margin: 0,
   borderRadius: "8px",
-  border: "1px solid #e4e6eb",
-  background: "#f0f2f5",
+  border: "1px solid rgba(128, 128, 128, 0.25)",
+  background: "rgba(128, 128, 128, 0.15)",
   fontSize: "14px",
-  color: "inherit",
   outline: "none",
 } as const;
 
@@ -110,6 +113,30 @@ const gayaTombolBiru = {
   cursor: "pointer",
 } as const;
 
+const gayaTombolKecil = {
+  padding: "6px 14px",
+  borderRadius: "8px",
+  fontSize: "13px",
+  fontWeight: 600,
+  cursor: "pointer",
+} as const;
+
+const gayaKartuKomentar = {
+  marginTop: "14px",
+  padding: "12px 14px",
+  borderRadius: "8px",
+  border: "1px solid rgba(128, 128, 128, 0.25)",
+  background: "rgba(128, 128, 128, 0.1)",
+} as const;
+
+const gayaKartuBalasan = {
+  marginTop: "12px",
+  padding: "8px 14px",
+  borderLeft: "3px solid #1877f2",
+  background: "rgba(128, 128, 128, 0.12)",
+  borderRadius: "6px",
+} as const;
+
 export default function ProfilePage() {
   const router = useRouter();
   const { t } = useForumContent();
@@ -120,6 +147,7 @@ export default function ProfilePage() {
   const [teksKomentar, setTeksKomentar] = useState<Record<number, string>>({});
   const [balasAktif, setBalasAktif] = useState<string | null>(null);
   const [teksBalas, setTeksBalas] = useState<Record<string, string>>({});
+  const [siapSimpan, setSiapSimpan] = useState(false);
 
   const nama = "graciacs.14052008";
   const email = "graciacs.14052008@gmail.com";
@@ -149,8 +177,36 @@ export default function ProfilePage() {
   };
 
   useEffect(() => {
+    try {
+      const komentarTersimpan = localStorage.getItem(KUNCI_KOMENTAR);
+      if (komentarTersimpan) setKomentarMap(JSON.parse(komentarTersimpan));
+      const postTersimpan = localStorage.getItem(KUNCI_POST);
+      if (postTersimpan) {
+        const parsed: Post[] = JSON.parse(postTersimpan);
+        if (Array.isArray(parsed) && parsed.length > 0) setDaftarPost(parsed);
+      }
+    } catch {}
+    setSiapSimpan(true);
+  }, []);
+
+  useEffect(() => {
     muatPost();
   }, []);
+
+  useEffect(() => {
+    if (!siapSimpan) return;
+    try {
+      localStorage.setItem(KUNCI_KOMENTAR, JSON.stringify(komentarMap));
+    } catch {}
+  }, [komentarMap, siapSimpan]);
+
+  useEffect(() => {
+    if (!siapSimpan) return;
+    if (daftarPost.some((p) => p.asli)) return;
+    try {
+      localStorage.setItem(KUNCI_POST, JSON.stringify(daftarPost));
+    } catch {}
+  }, [daftarPost, siapSimpan]);
 
   const gantiFoto = (file: File) => {
     const reader = new FileReader();
@@ -352,6 +408,7 @@ export default function ProfilePage() {
             <div style={{ display: "flex", gap: "10px", marginTop: "18px" }}>
               <input
                 id={`input-komentar-${p.id}`}
+                className={styles.isiPost}
                 value={teksKomentar[p.id] ?? ""}
                 onChange={(e) =>
                   setTeksKomentar((lama) => ({ ...lama, [p.id]: e.target.value }))
@@ -370,33 +427,37 @@ export default function ProfilePage() {
             {(komentarMap[p.id] ?? []).map((k) => {
               const kunci = `${p.id}-${k.id}`;
               return (
-                <div
-                  key={k.id}
-                  style={{
-                    marginTop: "14px",
-                    padding: "12px 14px",
-                    borderRadius: "8px",
-                    border: "1px solid #e4e6eb",
-                    background: "#f7f8fa",
-                  }}
-                >
-                  <strong style={{ fontSize: "14px" }}>{k.penulis}</strong>
-                  <p style={{ margin: "4px 0 10px", fontSize: "14px" }}>{k.teks}</p>
+                <div key={k.id} style={gayaKartuKomentar}>
+                  <strong
+                    className={styles.judulPost}
+                    style={{ display: "block", margin: 0, fontSize: "14px" }}
+                  >
+                    {k.penulis}
+                  </strong>
+                  <p
+                    className={styles.isiPost}
+                    style={{ margin: "4px 0 10px", fontSize: "14px" }}
+                  >
+                    {k.teks}
+                  </p>
                   <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                     <button
                       className={styles.tombolAksi}
+                      style={gayaTombolKecil}
                       onClick={() => sukaKomentar(p.id, k.id)}
                     >
                       {t("Suka", "Like")} ({k.suka})
                     </button>
                     <button
                       className={styles.tombolAksi}
+                      style={gayaTombolKecil}
                       onClick={() => tidakSukaKomentar(p.id, k.id)}
                     >
                       {t("Tidak Suka", "Dislike")} ({k.tidakSuka})
                     </button>
                     <button
                       className={styles.tombolAksi}
+                      style={gayaTombolKecil}
                       onClick={() =>
                         setBalasAktif(balasAktif === kunci ? null : kunci)
                       }
@@ -405,6 +466,11 @@ export default function ProfilePage() {
                     </button>
                     <button
                       className={styles.tombolAksi}
+                      style={{
+                        ...gayaTombolKecil,
+                        opacity: k.dilaporkan ? 0.6 : 1,
+                        cursor: k.dilaporkan ? "default" : "pointer",
+                      }}
                       disabled={k.dilaporkan}
                       onClick={() => laporKomentar(p.id, k.id)}
                     >
@@ -418,6 +484,7 @@ export default function ProfilePage() {
                     <div style={{ display: "flex", gap: "10px", marginTop: "12px" }}>
                       <input
                         autoFocus
+                        className={styles.isiPost}
                         value={teksBalas[kunci] ?? ""}
                         onChange={(e) =>
                           setTeksBalas((lama) => ({ ...lama, [kunci]: e.target.value }))
@@ -426,7 +493,7 @@ export default function ProfilePage() {
                           if (e.key === "Enter") kirimBalasan(p.id, k.id);
                         }}
                         placeholder={`${t("Balas", "Reply to")} ${k.penulis}...`}
-                        style={{ ...gayaKotakKomentar, background: "#ffffff" }}
+                        style={gayaKotakKomentar}
                       />
                       <button
                         style={gayaTombolBiru}
@@ -438,18 +505,19 @@ export default function ProfilePage() {
                   )}
 
                   {k.balasan.map((b) => (
-                    <div
-                      key={b.id}
-                      style={{
-                        marginTop: "12px",
-                        padding: "8px 14px",
-                        borderLeft: "3px solid #1877f2",
-                        background: "#ffffff",
-                        borderRadius: "6px",
-                      }}
-                    >
-                      <strong style={{ fontSize: "13px" }}>{b.penulis}</strong>
-                      <p style={{ margin: "2px 0 0", fontSize: "13px" }}>{b.teks}</p>
+                    <div key={b.id} style={gayaKartuBalasan}>
+                      <strong
+                        className={styles.judulPost}
+                        style={{ display: "block", margin: 0, fontSize: "13px" }}
+                      >
+                        {b.penulis}
+                      </strong>
+                      <p
+                        className={styles.isiPost}
+                        style={{ margin: "2px 0 0", fontSize: "13px" }}
+                      >
+                        {b.teks}
+                      </p>
                     </div>
                   ))}
                 </div>
