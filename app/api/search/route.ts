@@ -20,7 +20,7 @@ export async function GET(req: Request) {
         EXISTS(SELECT 1 FROM reactions r WHERE r.item_id=i.id AND r.type='dislike' AND r.user=?) AS disliked,
         EXISTS(SELECT 1 FROM joined j WHERE j.item_id=i.id AND j.user=?) AS joined
        FROM items i
-       WHERE (? = '' OR lower(i.title || ' ' || ifnull(i.content,'') || ' ' || ifnull(i.community,'') || ' ' || ifnull(i.meta,'')) LIKE ?)
+       WHERE (? = '' OR lower(i.title || ' ' || ifnull(i.content,'') || ' ' || ifnull(i.title_en,'') || ' ' || ifnull(i.content_en,'') || ' ' || ifnull(i.community,'') || ' ' || ifnull(i.meta,'')) LIKE ?)
        ORDER BY i.created_at DESC, i.id DESC`
     )
     .all(me, me, me, q, like) as any[];
@@ -32,6 +32,11 @@ export async function GET(req: Request) {
     meta: r.meta,
     title: r.title,
     content: r.content || "",
+    titleEn: r.title_en || r.title,
+    contentEn: r.content_en || r.content || "",
+    metaEn: r.meta_en || r.meta,
+    imageUrl: r.image_url ?? null,
+    videoUrl: r.video_url ?? null,
     kind: r.kind,
     hasMedia: !!r.media_type,
     mediaType: r.media_type,
