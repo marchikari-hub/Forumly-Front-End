@@ -4,7 +4,6 @@ import { Suspense, useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Comment, Item } from "@/lib/types";
 import { useTheme } from "@/lib/useTheme";
-import { ME_NAME } from "./me";
 import "./search.css";
 
 type Tab = "posts" | "community" | "comments";
@@ -30,8 +29,11 @@ function SearchView() {
 
   useEffect(() => { setInput(q); load(); }, [q, load]);
 
-  const post = (url: string, body?: unknown) =>
-    fetch(url, { method: "POST", body: body ? JSON.stringify(body) : undefined });
+  const post = async (url: string, body?: unknown) => {
+  const res = await fetch(url, { method: "POST", body: body ? JSON.stringify(body) : undefined });
+  if (res.status === 401) router.push("/login");
+  return res;
+};
 
   const react = async (it: Item, type: "like" | "dislike") => {
     await post(`/api/items/${it.id}/react`, { type });
@@ -141,8 +143,7 @@ function SearchView() {
               <div key={c.id} className="sr-comment">
                 <strong>{c.author}</strong>
                 <p>{c.text}</p>
-                {c.author === ME_NAME && <button type="button" className="sr-comment-del" onClick={() => delComment(c.id)}>Hapus</button>}
-              </div>
+                {c.mine && <button type="button" className="sr-comment-del" onClick={() => delComment(c.id)}>Hapus</button>}              </div>
             ))}
           </div>
           <div className="sr-comment-form">

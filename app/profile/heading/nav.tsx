@@ -11,7 +11,14 @@ export default function Nav() {
       <button className={styles.tombolBack} onClick={() => router.back()}>
         &lt;
       </button>
-      <button className={styles.tombolKeluar} onClick={() => router.push("/")}>
+      <button
+        className={styles.tombolKeluar}
+        onClick={async () => {
+          await fetch("/api/auth/logout", { method: "POST" });
+          router.push("/login");
+          router.refresh();
+        }}
+      >
         Sign Out
       </button>
     </nav>

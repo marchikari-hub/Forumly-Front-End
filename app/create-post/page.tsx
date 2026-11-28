@@ -51,6 +51,7 @@ export default function CreatePostPage() {
     setSaving(true);
     const res = await fetch("/api/posts", { method: "POST", body: fd });
     setSaving(false);
+    if (res.status === 401) return router.push("/login");
     if (!res.ok) return alert((await res.json()).error || "Gagal membuat post.");
     alert("Post berhasil dibuat di " + community + "!");
     router.push("/search?q=" + encodeURIComponent(title.trim()));

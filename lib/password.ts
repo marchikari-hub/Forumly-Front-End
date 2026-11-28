@@ -1,6 +1,5 @@
 import { randomBytes, scryptSync, timingSafeEqual } from "crypto";
 
-// Format: scrypt$<salt hex>$<hash hex>
 export function hashPassword(password: string): string {
   const salt = randomBytes(16);
   const hash = scryptSync(password, salt, 64);

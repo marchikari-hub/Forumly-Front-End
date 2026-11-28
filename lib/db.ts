@@ -1,6 +1,7 @@
 import { DatabaseSync } from "node:sqlite";
 import path from "path";
 import fs from "fs";
+import { hashPassword } from "./password";
 
 export const ME = "Gracia";
 
@@ -17,6 +18,12 @@ function init(): DatabaseSync {
   const db = new DatabaseSync(path.join(dir, "forumly.db"));
   db.exec("PRAGMA journal_mode = WAL");
   db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT NOT NULL UNIQUE COLLATE NOCASE,
+      password_hash TEXT NOT NULL,
+      created_at INTEGER
+    );
     CREATE TABLE IF NOT EXISTS notifications (
       id INTEGER PRIMARY KEY, type TEXT NOT NULL, icon TEXT, actor TEXT,
       message TEXT, community TEXT, snippet TEXT, created_at INTEGER,
@@ -24,9 +31,9 @@ function init(): DatabaseSync {
     );
     CREATE TABLE IF NOT EXISTS items (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
-      category TEXT NOT NULL,
+      category TEXT NOT NULL,            -- posts | community | comments
       community TEXT, author TEXT, meta TEXT, title TEXT NOT NULL,
-      content TEXT, kind TEXT DEFAULT 'text',
+      content TEXT, kind TEXT DEFAULT 'text',   -- text | media | link
       base_likes INTEGER DEFAULT 0,
       media BLOB, media_type TEXT, media_name TEXT,
       created_at INTEGER
@@ -41,6 +48,11 @@ function init(): DatabaseSync {
     );
     CREATE TABLE IF NOT EXISTS joined (user TEXT, item_id INTEGER, PRIMARY KEY (user, item_id));
   `);
+
+  if (count(db, "users") === 0) {
+    db.prepare("INSERT INTO users (username,password_hash,created_at) VALUES (?,?,?)")
+      .run(ME, hashPassword(process.env.SEED_PASSWORD || "gracia123"), Date.now());
+  }
 
   if (count(db, "notifications") === 0) {
     const now = Date.now();
