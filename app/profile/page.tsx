@@ -27,6 +27,24 @@ type Post = {
 
 type Kolom = "suka" | "tidakSuka" | "komentar" | "laporan";
 
+type Balasan = {
+  id: number;
+  penulis: string;
+  teks: string;
+};
+
+type Komentar = {
+  id: number;
+  penulis: string;
+  teks: string;
+  suka: number;
+  tidakSuka: number;
+  sudahSuka: boolean;
+  sudahTidakSuka: boolean;
+  dilaporkan: boolean;
+  balasan: Balasan[];
+};
+
 const postAwal: Post[] = [
   {
     id: 1,
@@ -70,12 +88,38 @@ const kirimJson = (url: string, body: object) =>
     body: JSON.stringify(body),
   });
 
+const gayaKotakKomentar = {
+  flex: 1,
+  padding: "10px 14px",
+  borderRadius: "8px",
+  border: "1px solid #e4e6eb",
+  background: "#f0f2f5",
+  fontSize: "14px",
+  color: "inherit",
+  outline: "none",
+} as const;
+
+const gayaTombolBiru = {
+  padding: "10px 18px",
+  borderRadius: "8px",
+  border: "none",
+  background: "#1877f2",
+  color: "#ffffff",
+  fontSize: "14px",
+  fontWeight: 600,
+  cursor: "pointer",
+} as const;
+
 export default function ProfilePage() {
   const router = useRouter();
   const { t } = useForumContent();
   const { foto, simpanFoto } = useFotoProfil();
   const [showCamera, setShowCamera] = useState(false);
   const [daftarPost, setDaftarPost] = useState<Post[]>(postAwal);
+  const [komentarMap, setKomentarMap] = useState<Record<number, Komentar[]>>({});
+  const [teksKomentar, setTeksKomentar] = useState<Record<number, string>>({});
+  const [balasAktif, setBalasAktif] = useState<string | null>(null);
+  const [teksBalas, setTeksBalas] = useState<Record<string, string>>({});
 
   const nama = "graciacs.14052008";
   const email = "graciacs.14052008@gmail.com";
@@ -161,6 +205,110 @@ export default function ProfilePage() {
 
   const tambahPost = () => router.push("/create-post");
 
+  const fokusKomentar = (id: number) => {
+    const el = document.getElementById(`input-komentar-${id}`);
+    if (el) el.focus();
+  };
+
+  const ubahKomentar = (
+    postId: number,
+    komentarId: number,
+    ubah: (k: Komentar) => Komentar
+  ) => {
+    setKomentarMap((lama) => ({
+      ...lama,
+      [postId]: (lama[postId] ?? []).map((k) =>
+        k.id === komentarId ? ubah(k) : k
+      ),
+    }));
+  };
+
+  const kirimKomentar = async (p: Post) => {
+    const text = (teksKomentar[p.id] ?? "").trim();
+    if (!text) return;
+
+    if (p.asli) {
+      const res = await kirimJson(`/api/items/${p.id}/comments`, { text });
+      if (res.status === 401) return router.push("/login");
+      if (!res.ok) return;
+    }
+
+    const baru: Komentar = {
+      id: Date.now(),
+      penulis: t("Anda", "You"),
+      teks: text,
+      suka: 0,
+      tidakSuka: 0,
+      sudahSuka: false,
+      sudahTidakSuka: false,
+      dilaporkan: false,
+      balasan: [],
+    };
+
+    setKomentarMap((lama) => ({
+      ...lama,
+      [p.id]: [...(lama[p.id] ?? []), baru],
+    }));
+    setTeksKomentar((lama) => ({ ...lama, [p.id]: "" }));
+
+    if (p.asli) {
+      await muatPost();
+    } else {
+      setDaftarPost((lama) =>
+        lama.map((x) => (x.id === p.id ? { ...x, komentar: x.komentar + 1 } : x))
+      );
+    }
+  };
+
+  const sukaKomentar = (postId: number, komentarId: number) => {
+    ubahKomentar(postId, komentarId, (k) =>
+      k.sudahSuka
+        ? { ...k, suka: Math.max(0, k.suka - 1), sudahSuka: false }
+        : {
+            ...k,
+            suka: k.suka + 1,
+            sudahSuka: true,
+            tidakSuka: k.sudahTidakSuka
+              ? Math.max(0, k.tidakSuka - 1)
+              : k.tidakSuka,
+            sudahTidakSuka: false,
+          }
+    );
+  };
+
+  const tidakSukaKomentar = (postId: number, komentarId: number) => {
+    ubahKomentar(postId, komentarId, (k) =>
+      k.sudahTidakSuka
+        ? { ...k, tidakSuka: Math.max(0, k.tidakSuka - 1), sudahTidakSuka: false }
+        : {
+            ...k,
+            tidakSuka: k.tidakSuka + 1,
+            sudahTidakSuka: true,
+            suka: k.sudahSuka ? Math.max(0, k.suka - 1) : k.suka,
+            sudahSuka: false,
+          }
+    );
+  };
+
+  const laporKomentar = (postId: number, komentarId: number) => {
+    ubahKomentar(postId, komentarId, (k) => ({ ...k, dilaporkan: true }));
+  };
+
+  const kirimBalasan = (postId: number, komentarId: number) => {
+    const kunci = `${postId}-${komentarId}`;
+    const text = (teksBalas[kunci] ?? "").trim();
+    if (!text) return;
+    ubahKomentar(postId, komentarId, (k) => ({
+      ...k,
+      balasan: [
+        ...k.balasan,
+        { id: Date.now(), penulis: t("Anda", "You"), teks: text },
+      ],
+    }));
+    setTeksBalas((lama) => ({ ...lama, [kunci]: "" }));
+    setBalasAktif(null);
+  };
+
   return (
     <div className={styles.halaman}>
       <Nav />
@@ -193,13 +341,120 @@ export default function ProfilePage() {
               <button className={styles.tombolAksi} onClick={() => aksi(p, "tidakSuka")}>
                 {t("Tidak Suka", "Dislike")} ({p.tidakSuka})
               </button>
-              <button className={styles.tombolAksi} onClick={() => aksi(p, "komentar")}>
+              <button className={styles.tombolAksi} onClick={() => fokusKomentar(p.id)}>
                 {t("Komentar", "Comments")} ({p.komentar})
               </button>
               <button className={styles.tombolAksi} onClick={() => aksi(p, "laporan")}>
                 {t("Laporkan", "Report")} ({p.laporan})
               </button>
             </div>
+
+            <div style={{ display: "flex", gap: "10px", marginTop: "18px" }}>
+              <input
+                id={`input-komentar-${p.id}`}
+                value={teksKomentar[p.id] ?? ""}
+                onChange={(e) =>
+                  setTeksKomentar((lama) => ({ ...lama, [p.id]: e.target.value }))
+                }
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") kirimKomentar(p);
+                }}
+                placeholder={t("Tulis komentar...", "Write a comment...")}
+                style={gayaKotakKomentar}
+              />
+              <button style={gayaTombolBiru} onClick={() => kirimKomentar(p)}>
+                {t("Kirim", "Send")}
+              </button>
+            </div>
+
+            {(komentarMap[p.id] ?? []).map((k) => {
+              const kunci = `${p.id}-${k.id}`;
+              return (
+                <div
+                  key={k.id}
+                  style={{
+                    marginTop: "14px",
+                    padding: "12px 14px",
+                    borderRadius: "8px",
+                    border: "1px solid #e4e6eb",
+                    background: "#f7f8fa",
+                  }}
+                >
+                  <strong style={{ fontSize: "14px" }}>{k.penulis}</strong>
+                  <p style={{ margin: "4px 0 10px", fontSize: "14px" }}>{k.teks}</p>
+                  <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
+                    <button
+                      className={styles.tombolAksi}
+                      onClick={() => sukaKomentar(p.id, k.id)}
+                    >
+                      {t("Suka", "Like")} ({k.suka})
+                    </button>
+                    <button
+                      className={styles.tombolAksi}
+                      onClick={() => tidakSukaKomentar(p.id, k.id)}
+                    >
+                      {t("Tidak Suka", "Dislike")} ({k.tidakSuka})
+                    </button>
+                    <button
+                      className={styles.tombolAksi}
+                      onClick={() =>
+                        setBalasAktif(balasAktif === kunci ? null : kunci)
+                      }
+                    >
+                      {t("Balas", "Reply")}
+                    </button>
+                    <button
+                      className={styles.tombolAksi}
+                      disabled={k.dilaporkan}
+                      onClick={() => laporKomentar(p.id, k.id)}
+                    >
+                      {k.dilaporkan
+                        ? t("Dilaporkan", "Reported")
+                        : t("Laporkan", "Report")}
+                    </button>
+                  </div>
+
+                  {balasAktif === kunci && (
+                    <div style={{ display: "flex", gap: "10px", marginTop: "12px" }}>
+                      <input
+                        autoFocus
+                        value={teksBalas[kunci] ?? ""}
+                        onChange={(e) =>
+                          setTeksBalas((lama) => ({ ...lama, [kunci]: e.target.value }))
+                        }
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") kirimBalasan(p.id, k.id);
+                        }}
+                        placeholder={`${t("Balas", "Reply to")} ${k.penulis}...`}
+                        style={{ ...gayaKotakKomentar, background: "#ffffff" }}
+                      />
+                      <button
+                        style={gayaTombolBiru}
+                        onClick={() => kirimBalasan(p.id, k.id)}
+                      >
+                        {t("Balas", "Reply")}
+                      </button>
+                    </div>
+                  )}
+
+                  {k.balasan.map((b) => (
+                    <div
+                      key={b.id}
+                      style={{
+                        marginTop: "12px",
+                        padding: "8px 14px",
+                        borderLeft: "3px solid #1877f2",
+                        background: "#ffffff",
+                        borderRadius: "6px",
+                      }}
+                    >
+                      <strong style={{ fontSize: "13px" }}>{b.penulis}</strong>
+                      <p style={{ margin: "2px 0 0", fontSize: "13px" }}>{b.teks}</p>
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
           </div>
         ))}
       </main>
