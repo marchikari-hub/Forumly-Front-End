@@ -114,8 +114,11 @@ const gayaTombolBiru = {
 } as const;
 
 const gayaTombolKecil = {
-  padding: "6px 14px",
-  borderRadius: "8px",
+  padding: "4px 10px",
+  borderRadius: "6px",
+  border: "none",
+  boxShadow: "none",
+  background: "transparent",
   fontSize: "13px",
   fontWeight: 600,
   cursor: "pointer",
