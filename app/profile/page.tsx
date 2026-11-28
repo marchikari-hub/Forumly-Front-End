@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Nav from "./heading/nav";
 import Hero from "./heading/hero";
 import Footer from "./footer/footer";
@@ -19,6 +20,7 @@ type Post = {
   tidakSuka: number;
   komentar: number;
   laporan: number;
+  asli?: boolean;
 };
 
 type Kolom = "suka" | "tidakSuka" | "komentar" | "laporan";
@@ -59,7 +61,15 @@ const postAwal: Post[] = [
   },
 ];
 
+const kirimJson = (url: string, body: object) =>
+  fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
 export default function ProfilePage() {
+  const router = useRouter();
   const { t } = useForumContent();
   const { foto, simpanFoto } = useFotoProfil();
   const [showCamera, setShowCamera] = useState(false);
@@ -67,6 +77,40 @@ export default function ProfilePage() {
 
   const nama = "graciacs.14052008";
   const email = "graciacs.14052008@gmail.com";
+
+  const muatPost = async () => {
+    try {
+      const res = await fetch("/api/search?q=", { cache: "no-store" });
+      if (!res.ok) return;
+      const data = await res.json();
+      const rows = Array.isArray(data)
+        ? data
+        : data.items ?? data.posts ?? data.results ?? [];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const milik: Post[] = rows
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .filter((r: any) => r.author === nama)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .map((r: any) => ({
+          id: Number(r.id),
+          judul: String(r.title ?? ""),
+          isi: String(r.content ?? ""),
+          suka: Number(r.likes ?? 0),
+          tidakSuka: Number(r.dislikes ?? 0),
+          komentar: Number(r.comments ?? r.commentCount ?? 0),
+          laporan: Number(r.reports ?? 0),
+          asli: true,
+        }));
+      if (milik.length > 0) setDaftarPost(milik);
+    } catch {
+      // kalau gagal, tetap pakai post contoh
+    }
+  };
+
+  useEffect(() => {
+    muatPost();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const gantiFoto = (file: File) => {
     const reader = new FileReader();
@@ -84,15 +128,29 @@ export default function ProfilePage() {
     );
   };
 
-  const tambahPost = () => {
-    const judul = window.prompt(t("Judul post baru:", "New post title:"));
-    if (!judul) return;
-    const isi = window.prompt(t("Isi post:", "Post content:")) || "";
-    setDaftarPost((lama) => [
-      { id: Date.now(), judul, isi, suka: 0, tidakSuka: 0, komentar: 0, laporan: 0 },
-      ...lama,
-    ]);
+  const aksi = async (p: Post, kolom: Kolom) => {
+    if (!p.asli) return tambahAngka(p.id, kolom);
+
+    let res: Response;
+    if (kolom === "suka" || kolom === "tidakSuka") {
+      res = await kirimJson(`/api/items/${p.id}/react`, {
+        type: kolom === "suka" ? "like" : "dislike",
+      });
+    } else if (kolom === "komentar") {
+      const text = window.prompt(t("Tulis komentar:", "Write a comment:"));
+      if (!text) return;
+      res = await kirimJson(`/api/items/${p.id}/comments`, { text });
+    } else {
+      const reason =
+        window.prompt(t("Alasan laporan:", "Report reason:"), "spam") || "spam";
+      res = await kirimJson(`/api/items/${p.id}/report`, { reason });
+    }
+
+    if (res.status === 401) return router.push("/login");
+    await muatPost();
   };
+
+  const tambahPost = () => router.push("/create-post");
 
   return (
     <div className={styles.halaman}>
@@ -120,16 +178,16 @@ export default function ProfilePage() {
             <p className={styles.isiPost}>{t(p.isi, p.isiEn ?? p.isi)}</p>
             <hr className={styles.garis} />
             <div className={styles.barisAksi}>
-              <button className={styles.tombolAksi} onClick={() => tambahAngka(p.id, "suka")}>
+              <button className={styles.tombolAksi} onClick={() => aksi(p, "suka")}>
                 ♥ {t("Suka", "Like")} ({p.suka})
               </button>
-              <button className={styles.tombolAksi} onClick={() => tambahAngka(p.id, "tidakSuka")}>
+              <button className={styles.tombolAksi} onClick={() => aksi(p, "tidakSuka")}>
                 {t("Tidak Suka", "Dislike")} ({p.tidakSuka})
               </button>
-              <button className={styles.tombolAksi} onClick={() => tambahAngka(p.id, "komentar")}>
+              <button className={styles.tombolAksi} onClick={() => aksi(p, "komentar")}>
                 {t("Komentar", "Comments")} ({p.komentar})
               </button>
-              <button className={styles.tombolAksi} onClick={() => tambahAngka(p.id, "laporan")}>
+              <button className={styles.tombolAksi} onClick={() => aksi(p, "laporan")}>
                 {t("Laporkan", "Report")} ({p.laporan})
               </button>
             </div>
